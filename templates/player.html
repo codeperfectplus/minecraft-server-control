@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="pageShell" class="transition-all duration-300 lg:pl-64 space-y-4">
+
+<!-- Quick Access Sidebar -->
+<div id="quickAccessNav" class="hidden lg:block fixed left-4 top-36 glass rounded-xl section-shell p-3 w-48 space-y-2 text-sm z-20" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
+    <div class="text-teal-100 font-semibold text-xs flex items-center gap-2 mb-2">
+        <i class="fas fa-user"></i> Player Menu
+        <button onclick="toggleQuickAccess()" class="ml-auto text-teal-300 hover:text-teal-100">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="space-y-1">
+        <a href="#stats" class="block px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-teal-50 transition text-xs">Statistics</a>
+        <a href="#history" class="block px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-teal-50 transition text-xs">History</a>
+    </div>
+</div>
+
+<!-- Player Header -->
+<div class="glass px-6 py-4 rounded-xl section-shell">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-3xl">
+                👤
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-white" id="playerName">Select a Player</h1>
+                <p class="text-gray-400 text-sm">Online status: <span id="playerStatus" class="text-green-400">Unknown</span></p>
+            </div>
+        </div>
+        <div>
+            <select id="playerSelector" onchange="loadPlayerData()" class="px-4 py-2 bg-gray-900 text-white rounded-lg border border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                <option value="">Select Player</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Player Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="glass rounded-xl p-4 section-shell">
+        <div class="text-sm text-gray-300 flex items-center gap-2"><i class="fas fa-heart text-red-400"></i> Health</div>
+        <div class="text-3xl font-semibold text-white mt-2" id="playerHealth">--</div>
+    </div>
+    <div class="glass rounded-xl p-4 section-shell">
+        <div class="text-sm text-gray-300 flex items-center gap-2"><i class="fas fa-drumstick-bite text-orange-400"></i> Food</div>
+        <div class="text-3xl font-semibold text-white mt-2" id="playerFood">--</div>
+    </div>
+    <div class="glass rounded-xl p-4 section-shell">
+        <div class="text-sm text-gray-300 flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i> XP Level</div>
+        <div class="text-3xl font-semibold text-white mt-2" id="playerXP">--</div>
+    </div>
+    <div class="glass rounded-xl p-4 section-shell">
+        <div class="text-sm text-gray-300 flex items-center gap-2"><i class="fas fa-crosshairs text-blue-400"></i> Position</div>
+        <div class="text-lg font-semibold text-white mt-2" id="playerPos">-- -- --</div>
+    </div>
+</div>
+
+<!-- Quick Save Location -->
+<div class="glass rounded-xl shadow-2xl p-6 border border-teal-500/50 section-shell">
+    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+        <i class="fas fa-map-pin text-teal-400 mr-3"></i>
+        Quick Save Location
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input id="quickSaveLocationName" class="px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="Location name (optional - auto-generated if empty)">
+        <button type="button" onclick="quickSavePlayerLocation()" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded font-semibold flex items-center justify-center gap-2">
+            <i class="fas fa-save"></i> Save Current Location
+        </button>
+    </div>
+    <p class="text-xs text-teal-200 mt-2">Saves the selected player's current position to presets. If no name is provided, a random name will be generated.</p>
+</div>
+
+<!-- Preset Locations -->
+<div class="glass rounded-xl shadow-2xl p-6 border border-indigo-500/50 section-shell">
+    <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+        <i class="fas fa-map-marked-alt text-indigo-400 mr-3"></i>
+        Preset Locations
+    </h2>
+    <div id="playerLocationsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div class="text-gray-400 text-sm">Loading...</div>
+    </div>
+</div>
+
+<!-- Player Statistics Section -->
+<div id="stats" class="glass rounded-xl shadow-2xl p-6 border border-green-500/50 section-shell">
+    <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+        <i class="fas fa-chart-line text-green-400 mr-3"></i>
+        Player Statistics
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="statsGrid">
+        <div class="text-gray-400 text-sm col-span-full text-center py-8">Select a player to view statistics</div>
+    </div>
+</div>
+
+<!-- Recent Actions History -->
+<div id="history" class="glass rounded-xl shadow-2xl p-6 border border-blue-500/50 section-shell">
+    <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+        <i class="fas fa-history text-blue-400 mr-3"></i>
+        Recent Actions
+    </h2>
+    <div id="historyList" class="space-y-2">
+        <div class="text-gray-400 text-sm text-center py-8">No recent actions</div>
+    </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleQuickAccess() {
+        const panel = document.getElementById('quickAccessNav');
+        const shell = document.getElementById('pageShell');
+        if (!panel || !shell) return;
+        
+        const isHidden = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden');
+        
+        if (window.innerWidth >= 1024) {
+            shell.classList.toggle('lg:pl-64', !isHidden);
+            shell.classList.toggle('lg:pl-6', isHidden);
+        }
+    }
+
+    async function loadPlayerData() {
+        const selector = document.getElementById('playerSelector');
+        const playerName = selector.value;
+        
+        if (!playerName) {
+            document.getElementById('playerName').textContent = 'Select a Player';
+            document.getElementById('playerStatus').textContent = 'Unknown';
+            document.getElementById('playerHealth').textContent = '--';
+            document.getElementById('playerFood').textContent = '--';
+            document.getElementById('playerXP').textContent = '--';
+            document.getElementById('playerPos').textContent = '-- -- --';
+            
+            // Reset sections to placeholder state
+            document.getElementById('statsGrid').innerHTML = '<div class="text-gray-400 text-sm col-span-full text-center py-8">Select a player to view statistics</div>';
+            document.getElementById('historyList').innerHTML = '<div class="text-gray-400 text-sm text-center py-8">No recent actions</div>';
+            return;
+        }
+
+        document.getElementById('playerName').textContent = playerName;
+        document.getElementById('playerStatus').textContent = 'Online';
+        
+        // Fetch all player data
+        try {
+            const formData = new FormData();
+            formData.append('player', playerName);
+            
+            // Get position
+            const posRes = await fetch('/api/player-location', { method: 'POST', body: formData });
+            const posData = await posRes.json();
+            if (posData.success) {
+                const coords = posData.coordinates;
+                document.getElementById('playerPos').textContent = `${coords.x}, ${coords.y}, ${coords.z}`;
+            }
+            
+            // Get stats (health, food, XP)
+            const statsRes = await fetch('/api/player-stats', { method: 'POST', body: formData });
+            const statsData = await statsRes.json();
+            if (statsData.success) {
+                const stats = statsData.stats;
+                document.getElementById('playerHealth').textContent = stats.health ? `❤️ ${Math.round(stats.health)}` : '--';
+                document.getElementById('playerFood').textContent = stats.food ? `🍖 ${stats.food}` : '--';
+                document.getElementById('playerXP').textContent = stats.xp_level !== undefined ? `⭐ ${stats.xp_level}` : '--';
+                
+                // Update statistics grid
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = `
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="text-sm text-gray-400">Game Mode</div>
+                        <div class="text-xl font-semibold text-white mt-1">${stats.game_mode || 'Unknown'}</div>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="text-sm text-gray-400">Health Points</div>
+                        <div class="text-xl font-semibold text-red-400 mt-1">${stats.health ? Math.round(stats.health) + '/20' : 'N/A'}</div>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="text-sm text-gray-400">Food Level</div>
+                        <div class="text-xl font-semibold text-orange-400 mt-1">${stats.food !== undefined ? stats.food + '/20' : 'N/A'}</div>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <div class="text-sm text-gray-400">Experience Level</div>
+                        <div class="text-xl font-semibold text-yellow-400 mt-1">${stats.xp_level !== undefined ? stats.xp_level : 'N/A'}</div>
+                    </div>
+                `;
+            }
+            
+            // Get inventory
+            const invRes = await fetch('/api/player-inventory', { method: 'POST', body: formData });
+            const invData = await invRes.json();
+            if (invData.success && invData.inventory.length > 0) {
+                const inventoryGrid = document.getElementById('inventoryGrid');
+                inventoryGrid.innerHTML = invData.inventory.map(item => `
+                    <div class="bg-gray-800/50 rounded-lg p-3 hover:bg-gray-700/50 transition">
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">📦</div>
+                            <div class="text-xs text-gray-300 truncate">${item.item.replace('minecraft:', '').replace(/_/g, ' ')}</div>
+                            <div class="text-xs text-green-400 mt-1">Used: ${item.count}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('inventoryGrid').innerHTML = '<div class="text-gray-400 text-sm col-span-full text-center py-8">No inventory data available</div>';
+            }
+            
+            // Get history
+            const histRes = await fetch('/api/player-history', { method: 'POST', body: formData });
+            const histData = await histRes.json();
+            if (histData.success && histData.history.length > 0) {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = histData.history.map(action => `
+                    <div class="flex items-center justify-between bg-gray-800/30 rounded-lg p-3 hover:bg-gray-700/30 transition">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-gift text-blue-400"></i>
+                            <div>
+                                <div class="text-white text-sm">${action.action}</div>
+                                <div class="text-gray-400 text-xs">${action.timestamp}</div>
+                            </div>
+                        </div>
+                        <div class="text-gray-400 text-sm">×${action.count}</div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('historyList').innerHTML = '<div class="text-gray-400 text-sm text-center py-8">No recent actions</div>';
+            }
+            
+            showNotification(`Loaded data for ${playerName}`);
+        } catch (error) {
+            console.error('Error loading player data:', error);
+            showNotification('Failed to load player data', 'error');
+        }
+    }
+
+    // Load players into selector
+    async function refreshPlayerSelector() {
+        try {
+            const response = await fetch('/api/players');
+            const data = await response.json();
+            
+            const selector = document.getElementById('playerSelector');
+            const currentValue = selector.value;
+            
+            selector.innerHTML = '<option value="">Select Player</option>' +
+                data.players.map(p => `<option value="${p}" ${p === currentValue ? 'selected' : ''}>${p}</option>`).join('');
+        } catch (error) {
+            console.error('Failed to refresh player list:', error);
+        }
+    }
+
+    // Auto-refresh player list every 10 seconds
+    setInterval(refreshPlayerSelector, 10000);
+    window.addEventListener('load', refreshPlayerSelector);
+    
+    // Auto-refresh player location every 5 seconds
+    let locationRefreshInterval = null;
+    
+    function startLocationRefresh() {
+        if (locationRefreshInterval) clearInterval(locationRefreshInterval);
+        
+        locationRefreshInterval = setInterval(async () => {
+            const selector = document.getElementById('playerSelector');
+            const playerName = selector.value;
+            
+            if (!playerName) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('player', playerName);
+                
+                const posRes = await fetch('/api/player-location', { method: 'POST', body: formData });
+                const posData = await posRes.json();
+                if (posData.success) {
+                    const coords = posData.coordinates;
+                    document.getElementById('playerPos').textContent = `${coords.x}, ${coords.y}, ${coords.z}`;
+                }
+            } catch (error) {
+                console.error('Error refreshing location:', error);
+            }
+        }, 5000);
+    }
+    
+    // Override loadPlayerData to start location refresh
+    const originalLoadPlayerData = loadPlayerData;
+    loadPlayerData = async function() {
+        await originalLoadPlayerData();
+        const selector = document.getElementById('playerSelector');
+        if (selector.value) {
+            startLocationRefresh();
+        } else {
+            if (locationRefreshInterval) {
+                clearInterval(locationRefreshInterval);
+                locationRefreshInterval = null;
+            }
+        }
+    };
+    
+    // Quick save location with random name generation
+    async function quickSavePlayerLocation() {
+        const selector = document.getElementById('playerSelector');
+        const player = selector.value;
+        let name = document.getElementById('quickSaveLocationName').value.trim();
+        
+        if (!player) {
+            showNotification('Select a player first', 'error');
+            return;
+        }
+        
+        // Generate random name if not provided
+        if (!name) {
+            const adjectives = ['Ancient', 'Hidden', 'Secret', 'Lost', 'Mystic', 'Sacred', 'Golden', 'Dark', 'Frozen', 'Crystal'];
+            const nouns = ['Cave', 'Temple', 'Base', 'Tower', 'Portal', 'Mine', 'Fortress', 'Village', 'Dungeon', 'Shrine'];
+            const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+            const randomNum = Math.floor(Math.random() * 999) + 1;
+            name = `${randomAdj} ${randomNoun} ${randomNum}`;
+        }
+        
+        const formData = new FormData();
+        formData.append('player', player);
+        
+        try {
+            const posRes = await fetch('/api/player-location', { method: 'POST', body: formData });
+            const posData = await posRes.json();
+            if (!posData.success) {
+                showNotification(posData.error || 'Failed to fetch position', 'error');
+                return;
+            }
+            
+            const coords = posData.coordinates;
+            const slugify = (str) => str.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+            
+            const payload = new FormData();
+            payload.append('id', slugify(name));
+            payload.append('name', name);
+            payload.append('icon', 'map-marker-alt');
+            payload.append('description', `Saved from ${player}`);
+            payload.append('x', coords.x);
+            payload.append('y', coords.y);
+            payload.append('z', coords.z);
+            
+            const saveRes = await fetch('/api/locations', { method: 'POST', body: payload });
+            const saveData = await saveRes.json();
+            if (saveData.success) {
+                showNotification(`Location "${name}" saved successfully!`);
+                document.getElementById('quickSaveLocationName').value = '';
+                loadPlayerLocations(); // Refresh locations list
+            } else {
+                showNotification(saveData.error || 'Failed to save location', 'error');
+            }
+        } catch (err) {
+            showNotification('Error saving location: ' + err.message, 'error');
+        }
+    }
+    
+    // Load preset locations
+    async function loadPlayerLocations() {
+        const list = document.getElementById('playerLocationsList');
+        list.innerHTML = '<div class="text-gray-400 text-sm col-span-full">Loading...</div>';
+        
+        try {
+            const res = await fetch('/api/locations');
+            const data = await res.json();
+            const locations = data.locations || [];
+            
+            if (!locations.length) {
+                list.innerHTML = '<div class="text-gray-400 text-sm col-span-full">No locations saved yet.</div>';
+                return;
+            }
+            
+            list.innerHTML = locations.map(loc => `
+                <div class="bg-gray-800/50 hover:bg-gray-700/50 border border-indigo-500/50 hover:border-indigo-400 rounded-lg p-4 transition cursor-pointer" onclick="teleportPlayerToLocation('${loc.id}')">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-${loc.icon || 'map-marker-alt'} text-indigo-400"></i>
+                            <span class="font-semibold text-white">${loc.name}</span>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300 mb-1">
+                        <i class="fas fa-crosshairs text-blue-400 mr-1"></i>
+                        ${loc.coordinates.x}, ${loc.coordinates.y}, ${loc.coordinates.z}
+                    </div>
+                    ${loc.description ? `<div class="text-xs text-gray-400 mt-2">${loc.description}</div>` : ''}
+                </div>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = '<div class="text-red-400 text-sm col-span-full">Failed to load locations</div>';
+        }
+    }
+    
+    // Teleport selected player to a preset location
+    async function teleportPlayerToLocation(locationId) {
+        const selector = document.getElementById('playerSelector');
+        const player = selector.value;
+        
+        if (!player) {
+            showNotification('Select a player first', 'error');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('player', player);
+        formData.append('location_id', locationId);
+        
+        try {
+            const res = await fetch('/tp', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                showNotification(`${player} teleported successfully!`);
+            } else {
+                showNotification(data.error || 'Failed to teleport', 'error');
+            }
+        } catch (err) {
+            showNotification('Error teleporting: ' + err.message, 'error');
+        }
+    }
+    
+    // Load locations on page load
+    window.addEventListener('load', loadPlayerLocations);
+</script>
+{% endblock %}

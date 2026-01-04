@@ -6,7 +6,53 @@
     <title>{% block title %}Minecraft Server Control{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --card: rgba(12, 20, 24, 0.82);
+            --border: rgba(94, 234, 212, 0.25);
+            --text: #e4f3f0;
+        }
+        [data-theme="plain"] {
+            --bg-from: rgba(94, 234, 212, 0.1);
+            --bg-to: rgba(59, 130, 246, 0.12);
+            --primary: #5eead4;
+            --primary-hover: #2dd4bf;
+            --secondary: #10b981;
+        }
+        [data-theme="desert"] {
+            --bg-from: rgba(251, 191, 36, 0.12);
+            --bg-to: rgba(245, 158, 11, 0.1);
+            --primary: #fbbf24;
+            --primary-hover: #f59e0b;
+            --secondary: #f97316;
+            --border: rgba(251, 191, 36, 0.25);
+        }
+        [data-theme="savanna"] {
+            --bg-from: rgba(217, 119, 6, 0.1);
+            --bg-to: rgba(180, 83, 9, 0.12);
+            --primary: #d97706;
+            --primary-hover: #b45309;
+            --secondary: #92400e;
+            --border: rgba(217, 119, 6, 0.25);
+        }
+        [data-theme="taiga"] {
+            --bg-from: rgba(34, 197, 94, 0.08);
+            --bg-to: rgba(59, 130, 246, 0.1);
+            --primary: #22c55e;
+            --primary-hover: #16a34a;
+            --secondary: #3b82f6;
+            --border: rgba(34, 197, 94, 0.25);
+        }
+        [data-theme="snowy"] {
+            --bg-from: rgba(219, 234, 254, 0.15);
+            --bg-to: rgba(147, 197, 253, 0.12);
+            --primary: #93c5fd;
+            --primary-hover: #60a5fa;
+            --secondary: #dbeafe;
+            --border: rgba(219, 234, 254, 0.3);
+        }
+        * { font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -15,26 +61,63 @@
             animation: fadeIn 0.3s ease-out;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
         }
+        .section-shell { border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 16px 40px rgba(0,0,0,0.28); }
+        .soft-scroll::-webkit-scrollbar { height: 6px; }
+        .soft-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.35); border-radius: 999px; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-green-900 via-emerald-800 to-teal-900 min-h-screen">
-    <nav class="bg-black bg-opacity-50 backdrop-blur-md border-b border-green-500 shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
+<body class="min-h-screen" data-theme="plain" style="background: radial-gradient(120% 80% at 20% 20%, var(--bg-from, rgba(94, 234, 212, 0.1)), transparent), radial-gradient(120% 90% at 80% 10%, var(--bg-to, rgba(59, 130, 246, 0.12)), transparent), #031016;">
+    <nav class="glass border-b border-green-500/40 shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-cube text-green-400 text-3xl"></i>
-                    <h1 class="text-2xl font-bold text-white">Minecraft Server Control</h1>
+                    <i class="fas fa-cube text-green-400 text-2xl md:text-3xl"></i>
+                    <h1 class="text-xl md:text-2xl font-bold text-white">Minecraft Server Control</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span id="player-count" class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                        <i class="fas fa-users"></i> <span id="count">0</span> Players
+                <div class="flex items-center gap-3">
+                    <a href="/" class="text-white hover:text-green-400 transition px-2 py-1 text-sm">
+                        <i class="fas fa-home"></i><span class="hidden sm:inline ml-2">Dashboard</span>
+                    </a>
+                    <a href="/player" class="text-white hover:text-green-400 transition px-2 py-1 text-sm">
+                        <i class="fas fa-user"></i><span class="hidden sm:inline ml-2">Players</span>
+                    </a>
+                    <a href="/diagnostics" class="text-white hover:text-green-400 transition px-2 py-1 text-sm">
+                        <i class="fas fa-wrench"></i><span class="hidden sm:inline ml-2">Diagnostics</span>
+                    </a>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 md:gap-3">
+                    <div class="relative">
+                        <button onclick="document.getElementById('themeMenu').classList.toggle('hidden')" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition flex items-center gap-2 text-sm">
+                            <i class="fas fa-palette"></i> <span id="currentTheme" class="hidden sm:inline">Plain</span>
+                        </button>
+                        <div id="themeMenu" class="hidden absolute right-0 mt-2 w-44 glass rounded-lg shadow-xl border border-white/20 p-2 z-50">
+                            <button onclick="setTheme('plain')" class="w-full text-left px-3 py-2 rounded text-teal-100 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-leaf"></i> Plain
+                            </button>
+                            <button onclick="setTheme('desert')" class="w-full text-left px-3 py-2 rounded text-yellow-200 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-sun"></i> Desert
+                            </button>
+                            <button onclick="setTheme('savanna')" class="w-full text-left px-3 py-2 rounded text-orange-200 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-tree"></i> Savanna
+                            </button>
+                            <button onclick="setTheme('taiga')" class="w-full text-left px-3 py-2 rounded text-green-200 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-snowflake"></i> Taiga
+                            </button>
+                            <button onclick="setTheme('snowy')" class="w-full text-left px-3 py-2 rounded text-blue-200 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-icicles"></i> Snowy
+                            </button>
+                        </div>
+                    </div>
+                    <span id="player-count" class="bg-green-500 text-white px-3 py-2 rounded-full text-xs md:text-sm font-semibold flex items-center gap-1">
+                        <i class="fas fa-users"></i> <span id="count">0</span><span class="hidden sm:inline ml-1">Players</span>
                     </span>
-                    <button onclick="refreshPlayers()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                    <button onclick="refreshPlayers()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition text-sm">
+                        <i class="fas fa-sync-alt"></i><span class="hidden sm:inline ml-2">Refresh</span>
                     </button>
                 </div>
             </div>
@@ -88,6 +171,28 @@
                 showNotification('Failed to refresh players', 'error');
             }
         }
+
+        // Theme management
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('mcTheme', theme);
+            const themeNames = { plain: 'Plain', desert: 'Desert', savanna: 'Savanna', taiga: 'Taiga', snowy: 'Snowy' };
+            document.getElementById('currentTheme').textContent = themeNames[theme] || 'Plain';
+            document.getElementById('themeMenu').classList.add('hidden');
+        }
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('mcTheme') || 'plain';
+        setTheme(savedTheme);
+        
+        // Close theme menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('themeMenu');
+            const btn = e.target.closest('button');
+            if (menu && !menu.contains(e.target) && (!btn || !btn.onclick?.toString().includes('themeMenu'))) {
+                menu.classList.add('hidden');
+            }
+        });
 
         // Auto-refresh players every 10 seconds
         setInterval(refreshPlayers, 10000);

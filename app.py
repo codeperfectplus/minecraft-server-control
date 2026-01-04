@@ -222,6 +222,12 @@ def diagnostics():
     """RCON diagnostics page"""
     return render_template("diagnostics.html")
 
+@app.route("/player")
+def player():
+    """Player management page"""
+    players = get_online_players()
+    return render_template("player.html", players=players)
+
 @app.route("/api/players")
 def api_players():
     """API endpoint to refresh player list"""
@@ -292,6 +298,92 @@ def api_location_detail(loc_id):
 
     upsert_location(payload)
     return jsonify({"success": True})
+
+
+@app.route("/api/player-stats", methods=["POST"])
+def api_player_stats():
+    """Get player statistics like health, food, XP, etc."""
+    player = request.form.get("player") if request.form else (request.json or {}).get("player")
+    if not player:
+        return jsonify({"success": False, "error": "Player is required"}), 400
+
+    stats = {}
+    
+    # Get Health
+    result = run_command(f"/data get entity {player} Health")
+    if not str(result).startswith("Error"):
+        match = re.search(r'(\d+\.?\d*)f?', str(result))
+        if match:
+            stats["health"] = float(match.group(1))
+    
+    # Get Food Level
+    result = run_command(f"/data get entity {player} foodLevel")
+    if not str(result).startswith("Error"):
+        match = re.search(r'(\d+)', str(result))
+        if match:
+            stats["food"] = int(match.group(1))
+    
+    # Get XP Level
+    result = run_command(f"/data get entity {player} XpLevel")
+    if not str(result).startswith("Error"):
+        match = re.search(r'(\d+)', str(result))
+        if match:
+            stats["xp_level"] = int(match.group(1))
+    
+    # Get Game Mode
+    result = run_command(f"/data get entity {player} playerGameType")
+    if not str(result).startswith("Error"):
+        match = re.search(r'(\d+)', str(result))
+        if match:
+            game_modes = {0: "Survival", 1: "Creative", 2: "Adventure", 3: "Spectator"}
+            stats["game_mode"] = game_modes.get(int(match.group(1)), "Unknown")
+    
+    return jsonify({"success": True, "stats": stats})
+
+
+@app.route("/api/player-inventory", methods=["POST"])
+def api_player_inventory():
+    """Get player inventory items (simplified version)"""
+    player = request.form.get("player") if request.form else (request.json or {}).get("player")
+    if not player:
+        return jsonify({"success": False, "error": "Player is required"}), 400
+    
+    # This is a simplified version. Full inventory parsing would require complex NBT data parsing
+    # For now, we'll return item usage history as "recent items"
+    db = get_db()
+    recent_items = db.execute(
+        "SELECT item, used_count, last_used FROM item_usage ORDER BY last_used DESC LIMIT 20"
+    ).fetchall()
+    
+    inventory = [{
+        "item": row["item"],
+        "count": row["used_count"],
+        "last_used": row["last_used"]
+    } for row in recent_items]
+    
+    return jsonify({"success": True, "inventory": inventory})
+
+
+@app.route("/api/player-history", methods=["POST"])
+def api_player_history():
+    """Get recent actions for a player from item usage history"""
+    player = request.form.get("player") if request.form else (request.json or {}).get("player")
+    if not player:
+        return jsonify({"success": False, "error": "Player is required"}), 400
+    
+    # Get recent item usage as history
+    db = get_db()
+    history = db.execute(
+        "SELECT item, used_count, last_used FROM item_usage ORDER BY last_used DESC LIMIT 15"
+    ).fetchall()
+    
+    actions = [{
+        "action": f"Received {row['item']}",
+        "count": row["used_count"],
+        "timestamp": row["last_used"]
+    } for row in history]
+    
+    return jsonify({"success": True, "history": actions})
 
 
 @app.route("/api/player-location", methods=["POST"])

@@ -7,12 +7,14 @@ import sqlite3
 
 app = Flask(__name__)
 
-DB_PATH = "/mnt/data/self-host/minecraft-control/data.db"
+# Allow overriding DB path via env so container volume mounts can control location
+DB_PATH = os.environ.get("DB_PATH", "/app/data/data.db")
 
 
 def get_db():
     db = getattr(g, "_db", None)
     if db is None:
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         db = sqlite3.connect(DB_PATH, check_same_thread=False)
         db.row_factory = sqlite3.Row
         g._db = db

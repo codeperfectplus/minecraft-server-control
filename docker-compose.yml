@@ -7,6 +7,6 @@ services:
     ports:
       - "5090:5090"
     volumes:
-      - /mnt/data/self-host/minecraft-control/data.db:/app/data.db
+      - /mnt/data/self-host/minecraft-control:/app/data
     restart: unless-stopped
     command: ["gunicorn", "--bind", "0.0.0.0:5090", "app:app"]

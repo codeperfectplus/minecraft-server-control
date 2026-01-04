@@ -9,48 +9,67 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --card: rgba(12, 20, 24, 0.82);
-            --border: rgba(94, 234, 212, 0.25);
+            --card: rgba(10, 18, 22, 0.84);
+            --border: rgba(94, 234, 212, 0.32);
             --text: #e4f3f0;
-        }
-        [data-theme="plain"] {
-            --bg-from: rgba(94, 234, 212, 0.1);
-            --bg-to: rgba(59, 130, 246, 0.12);
+            --bg-spot-1: rgba(94, 234, 212, 0.16);
+            --bg-spot-2: rgba(59, 130, 246, 0.14);
+            --bg-stripe-1: #041019;
+            --bg-stripe-2: #060d14;
+            --grain: rgba(255,255,255,0.02);
             --primary: #5eead4;
             --primary-hover: #2dd4bf;
             --secondary: #10b981;
         }
+        [data-theme="plain"] {
+            --bg-spot-1: rgba(46, 204, 113, 0.18);
+            --bg-spot-2: rgba(52, 152, 219, 0.16);
+            --bg-stripe-1: #06141c;
+            --bg-stripe-2: #071923;
+            --primary: #5eead4;
+            --primary-hover: #2dd4bf;
+            --secondary: #10b981;
+            --border: rgba(94, 234, 212, 0.35);
+        }
         [data-theme="desert"] {
-            --bg-from: rgba(251, 191, 36, 0.12);
-            --bg-to: rgba(245, 158, 11, 0.1);
+            --bg-spot-1: rgba(234, 179, 8, 0.22);
+            --bg-spot-2: rgba(217, 119, 6, 0.18);
+            --bg-stripe-1: #20130c;
+            --bg-stripe-2: #2a1b0f;
             --primary: #fbbf24;
             --primary-hover: #f59e0b;
             --secondary: #f97316;
-            --border: rgba(251, 191, 36, 0.25);
+            --border: rgba(251, 191, 36, 0.35);
         }
         [data-theme="savanna"] {
-            --bg-from: rgba(217, 119, 6, 0.1);
-            --bg-to: rgba(180, 83, 9, 0.12);
+            --bg-spot-1: rgba(180, 83, 9, 0.18);
+            --bg-spot-2: rgba(134, 65, 8, 0.16);
+            --bg-stripe-1: #1c1209;
+            --bg-stripe-2: #25170b;
             --primary: #d97706;
             --primary-hover: #b45309;
             --secondary: #92400e;
-            --border: rgba(217, 119, 6, 0.25);
+            --border: rgba(217, 119, 6, 0.32);
         }
         [data-theme="taiga"] {
-            --bg-from: rgba(34, 197, 94, 0.08);
-            --bg-to: rgba(59, 130, 246, 0.1);
+            --bg-spot-1: rgba(34, 197, 94, 0.16);
+            --bg-spot-2: rgba(59, 130, 246, 0.14);
+            --bg-stripe-1: #0c1714;
+            --bg-stripe-2: #0a1210;
             --primary: #22c55e;
             --primary-hover: #16a34a;
             --secondary: #3b82f6;
-            --border: rgba(34, 197, 94, 0.25);
+            --border: rgba(34, 197, 94, 0.32);
         }
         [data-theme="snowy"] {
-            --bg-from: rgba(219, 234, 254, 0.15);
-            --bg-to: rgba(147, 197, 253, 0.12);
-            --primary: #93c5fd;
-            --primary-hover: #60a5fa;
+            --bg-spot-1: rgba(180, 205, 255, 0.22);
+            --bg-spot-2: rgba(124, 166, 255, 0.18);
+            --bg-stripe-1: #0b1221;
+            --bg-stripe-2: #0d1426;
+            --primary: #9ac5ff;
+            --primary-hover: #7bb0ff;
             --secondary: #dbeafe;
-            --border: rgba(219, 234, 254, 0.3);
+            --border: rgba(154, 197, 255, 0.35);
         }
         * { font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; }
         @keyframes fadeIn {
@@ -71,7 +90,12 @@
         .soft-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.35); border-radius: 999px; }
     </style>
 </head>
-<body class="min-h-screen" data-theme="plain" style="background: radial-gradient(120% 80% at 20% 20%, var(--bg-from, rgba(94, 234, 212, 0.1)), transparent), radial-gradient(120% 90% at 80% 10%, var(--bg-to, rgba(59, 130, 246, 0.12)), transparent), #031016;">
+<body class="min-h-screen" data-theme="plain" style="background:
+    radial-gradient(140% 100% at 20% 20%, var(--bg-spot-1), transparent),
+    radial-gradient(140% 120% at 80% 0%, var(--bg-spot-2), transparent),
+    linear-gradient(135deg, var(--bg-stripe-1), var(--bg-stripe-2)),
+    repeating-linear-gradient(90deg, transparent 0, transparent 28px, rgba(255,255,255,0.018) 28px, rgba(255,255,255,0.018) 32px),
+    #050b10;">
     <nav class="glass border-b border-green-500/40 shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-3">
             <div class="flex flex-wrap items-center justify-between gap-3">

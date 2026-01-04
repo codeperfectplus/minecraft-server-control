@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: minecraft-server-control
+    env_file:
+      - .env
+    ports:
+      - "5090:5090"
+    volumes:
+      - /mnt/data/self-host/minecraft-control/data.db:/app/data.db
+    restart: unless-stopped
+    command: ["gunicorn", "--bind", "0.0.0.0:5090", "app:app"]

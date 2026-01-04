@@ -22,31 +22,50 @@ def safe_signal(signalnum, handler):
 
 signal.signal = safe_signal
 
+_client = None
+_client_lock = threading.Lock()
+
+
+def _connect_new():
+    """Create and connect a new RCON client."""
+    client = MCRcon(RCON_HOST, RCON_PASSWORD, port=RCON_PORT)
+    client.connect()
+    return client
+
+
+def _get_client():
+    """Return a connected, shared RCON client (thread-safe)."""
+    global _client
+    with _client_lock:
+        if _client is None:
+            _client = _connect_new()
+        return _client
+
+
 def run_command(command):
-    """Execute a command on the Minecraft server via RCON"""
-    mcr = None
+    """Execute a command on the Minecraft server via RCON with connection reuse."""
     try:
-        # Create connection and set socket timeout directly
-        mcr = MCRcon(RCON_HOST, RCON_PASSWORD, port=RCON_PORT)
-        # Override the socket before connecting to avoid signal usage
-        mcr.connect()
-        response = mcr.command(command)
-        return response
-    except socket.timeout:
-        return "Error: Connection timed out. Is the Minecraft server running?"
-    except ConnectionRefusedError:
-        return "Error: Connection refused. Make sure Minecraft server is running and RCON is enabled."
+        client = _get_client()
+        return client.command(command)
+    except (socket.timeout, ConnectionRefusedError) as conn_err:
+        return "Error: Connection timed out. Is the Minecraft server running?" if isinstance(conn_err, socket.timeout) else "Error: Connection refused. Make sure Minecraft server is running and RCON is enabled."
     except Exception as e:
         error_msg = str(e)
         if "Authentication failed" in error_msg or "Login failed" in error_msg:
             return "Error: Authentication failed. Check RCON password in .env file."
-        return f"Error: {error_msg}"
-    finally:
-        if mcr:
-            try:
-                mcr.disconnect()
-            except:
-                pass
+
+        # Attempt one reconnect+retry on a broken pipe/socket closure
+        try:
+            with _client_lock:
+                try:
+                    if _client:
+                        _client.disconnect()
+                except Exception:
+                    pass
+                _client = _connect_new()
+                return _client.command(command)
+        except Exception:
+            return f"Error: {error_msg}"
 
 def get_online_players():
     """Get list of online players"""

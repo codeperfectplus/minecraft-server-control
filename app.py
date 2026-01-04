@@ -1,12 +1,49 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from rcon_client import run_command, get_online_players
 from commands import ITEMS, VILLAGE_TYPES
 import json
 import os
+import sqlite3
 
 app = Flask(__name__)
 
-# Load configurations from JSON files
+DB_PATH = "/mnt/data/self-host/minecraft-control/data.db"
+
+
+def get_db():
+    db = getattr(g, "_db", None)
+    if db is None:
+        db = sqlite3.connect(DB_PATH, check_same_thread=False)
+        db.row_factory = sqlite3.Row
+        g._db = db
+    return db
+
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = getattr(g, "_db", None)
+    if db is not None:
+        db.close()
+
+
+def init_db():
+    db = get_db()
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS locations (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            icon TEXT DEFAULT 'map-marker-alt',
+            description TEXT,
+            x INTEGER NOT NULL,
+            y INTEGER NOT NULL,
+            z INTEGER NOT NULL
+        )
+        """
+    )
+    db.commit()
+
+
 def load_json_config(filename):
     config_path = os.path.join(os.path.dirname(__file__), 'config', filename)
     try:
@@ -17,8 +54,74 @@ def load_json_config(filename):
     except json.JSONDecodeError:
         return {}
 
-# Load locations and kits
-LOCATIONS_CONFIG = load_json_config('locations.json')
+
+def seed_locations_if_empty():
+    db = get_db()
+    count = db.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
+    if count == 0:
+        seed = load_json_config('locations.json').get('locations', [])
+        for loc in seed:
+            coords = loc.get('coordinates', {})
+            db.execute(
+                "INSERT OR REPLACE INTO locations (id, name, icon, description, x, y, z) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    loc.get('id'),
+                    loc.get('name'),
+                    loc.get('icon', 'map-marker-alt'),
+                    loc.get('description', ''),
+                    int(coords.get('x', 0)),
+                    int(coords.get('y', 0)),
+                    int(coords.get('z', 0)),
+                ),
+            )
+        db.commit()
+
+
+def fetch_locations():
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, name, icon, description, x, y, z FROM locations ORDER BY name"
+    ).fetchall()
+    return [
+        {
+            "id": row["id"],
+            "name": row["name"],
+            "icon": row["icon"],
+            "description": row["description"],
+            "coordinates": {"x": row["x"], "y": row["y"], "z": row["z"]},
+        }
+        for row in rows
+    ]
+
+
+def upsert_location(data):
+    db = get_db()
+    db.execute(
+        "INSERT OR REPLACE INTO locations (id, name, icon, description, x, y, z) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (
+            data["id"],
+            data["name"],
+            data.get("icon", "map-marker-alt"),
+            data.get("description", ""),
+            int(data["x"]),
+            int(data["y"]),
+            int(data["z"]),
+        ),
+    )
+    db.commit()
+
+
+def delete_location(loc_id):
+    db = get_db()
+    db.execute("DELETE FROM locations WHERE id = ?", (loc_id,))
+    db.commit()
+
+
+with app.app_context():
+    init_db()
+    seed_locations_if_empty()
+
+# Load kits
 KITS_CONFIG = load_json_config('kits.json')
 
 @app.route("/")
@@ -28,7 +131,7 @@ def dashboard():
                          players=players,
                          items=ITEMS,
                          village_types=VILLAGE_TYPES,
-                         locations=LOCATIONS_CONFIG.get('locations', []),
+                         locations=fetch_locations(),
                          kits=KITS_CONFIG.get('kits', []))
 
 @app.route("/diagnostics")
@@ -60,6 +163,53 @@ def test_connection():
     
     return jsonify(diagnostics)
 
+
+@app.route("/api/locations", methods=["GET", "POST"])
+def api_locations():
+    if request.method == "GET":
+        return jsonify({"locations": fetch_locations()})
+
+    data = request.form or request.json or {}
+    required = ["id", "name", "x", "y", "z"]
+    missing = [r for r in required if not data.get(r)]
+    if missing:
+        return jsonify({"success": False, "error": f"Missing fields: {', '.join(missing)}"}), 400
+
+    upsert_location({
+        "id": str(data.get("id")).strip(),
+        "name": data.get("name").strip(),
+        "icon": (data.get("icon") or "map-marker-alt").strip(),
+        "description": (data.get("description") or "").strip(),
+        "x": int(data.get("x")),
+        "y": int(data.get("y")),
+        "z": int(data.get("z")),
+    })
+    return jsonify({"success": True})
+
+
+@app.route("/api/locations/<loc_id>", methods=["PUT", "PATCH", "DELETE"])
+def api_location_detail(loc_id):
+    if request.method == "DELETE":
+        delete_location(loc_id)
+        return jsonify({"success": True})
+
+    data = request.form or request.json or {}
+    payload = {
+        "id": loc_id,
+        "name": data.get("name"),
+        "icon": data.get("icon"),
+        "description": data.get("description"),
+        "x": data.get("x"),
+        "y": data.get("y"),
+        "z": data.get("z"),
+    }
+
+    if not payload["name"]:
+        return jsonify({"success": False, "error": "Missing name"}), 400
+
+    upsert_location(payload)
+    return jsonify({"success": True})
+
 @app.route("/command", methods=["POST"])
 def execute_command():
     """Execute any Minecraft command"""
@@ -84,9 +234,7 @@ def teleport():
     print(f"Player: {player}")
     print(f"Location ID: {location_id}")
     
-    # Find location in config
-    locations = LOCATIONS_CONFIG.get('locations', [])
-    location = next((loc for loc in locations if loc['id'] == location_id), None)
+    location = next((loc for loc in fetch_locations() if loc['id'] == location_id), None)
     
     if location:
         coords = location['coordinates']
@@ -152,6 +300,28 @@ def quick_command():
         "fire_resistance": f"/effect give {player} minecraft:fire_resistance 600 0",
         "clear_effects": f"/effect clear {player}",
         "full_health": f"/effect give {player} minecraft:regeneration 10 255",
+        "hero_of_village": f"/effect give {player} minecraft:hero_of_the_village 1200 0",
+        "xp_reset": f"/xp set {player} 0 points",
+        "op_player": f"/op {player}",
+        "deop_player": f"/deop {player}",
+        "whitelist_add": f"/whitelist add {player}",
+        "whitelist_remove": f"/whitelist remove {player}",
+        "difficulty_peaceful": "/difficulty peaceful",
+        "difficulty_normal": "/difficulty normal",
+        "difficulty_hard": "/difficulty hard",
+        "keep_inventory_on": "/gamerule keepInventory true",
+        "keep_inventory_off": "/gamerule keepInventory false",
+        "mob_griefing_off": "/gamerule mobGriefing false",
+        "mob_griefing_on": "/gamerule mobGriefing true",
+        "daylight_cycle_off": "/gamerule doDaylightCycle false",
+        "daylight_cycle_on": "/gamerule doDaylightCycle true",
+        "worldborder_small": "/worldborder set 500 30",
+        "worldborder_medium": "/worldborder set 2000 60",
+        "worldborder_large": "/worldborder set 5000 120",
+        "worldborder_infinite": "/worldborder set 60000000 0",
+        "spawn_villager_librarian": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:librarian\",type:\"minecraft:plains\",level:5}}",
+        "spawn_iron_golem": "/summon iron_golem ~ ~ ~",
+        "clear_ground_items": "/kill @e[type=item]",
     }
     
     cmd = commands_map.get(command_type)

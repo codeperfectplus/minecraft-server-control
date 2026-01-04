@@ -199,6 +199,69 @@
                             <button type="button" onclick="quickCommand('rain')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">
                                 <i class="fas fa-cloud-rain mr-1"></i> Rain
                             </button>
+                            <button type="button" onclick="quickCommand('thunder')" class="bg-gray-800 hover:bg-purple-700 text-white px-3 py-2 rounded text-xs transition">
+                                <i class="fas fa-bolt mr-1"></i> Thunder
+                            </button>
+                            <button type="button" onclick="quickCommand('clear_ground_items')" class="bg-gray-800 hover:bg-red-700 text-white px-3 py-2 rounded text-xs transition">
+                                <i class="fas fa-broom mr-1"></i> Clear Drops
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Difficulty</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="quickCommand('difficulty_peaceful')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">
+                                Peaceful
+                            </button>
+                            <button type="button" onclick="quickCommand('difficulty_normal')" class="bg-gray-800 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition">
+                                Normal
+                            </button>
+                            <button type="button" onclick="quickCommand('difficulty_hard')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">
+                                Hard
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Rules</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="quickCommand('keep_inventory_on')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">Keep Inv On</button>
+                            <button type="button" onclick="quickCommand('keep_inventory_off')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">Keep Inv Off</button>
+                            <button type="button" onclick="quickCommand('mob_griefing_off')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">Mob Grief Off</button>
+                            <button type="button" onclick="quickCommand('mob_griefing_on')" class="bg-gray-800 hover:bg-orange-600 text-white px-3 py-2 rounded text-xs transition">Mob Grief On</button>
+                            <button type="button" onclick="quickCommand('daylight_cycle_off')" class="bg-gray-800 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition">Freeze Time</button>
+                            <button type="button" onclick="quickCommand('daylight_cycle_on')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">Resume Time</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">World Border</h3>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="quickCommand('worldborder_small')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">500</button>
+                            <button type="button" onclick="quickCommand('worldborder_medium')" class="bg-gray-800 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition">2k</button>
+                            <button type="button" onclick="quickCommand('worldborder_large')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">5k</button>
+                            <button type="button" onclick="quickCommand('worldborder_infinite')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">Infinite</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Admin & Utility</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="quickCommand('op_player')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">OP</button>
+                            <button type="button" onclick="quickCommand('deop_player')" class="bg-gray-800 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs transition">De-OP</button>
+                            <button type="button" onclick="quickCommand('whitelist_add')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">Whitelist +</button>
+                            <button type="button" onclick="quickCommand('whitelist_remove')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">Whitelist -</button>
+                            <button type="button" onclick="quickCommand('xp_reset')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">Reset XP</button>
+                            <button type="button" onclick="quickCommand('hero_of_village')" class="bg-gray-800 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition">Hero Buff</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Village Helpers</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="quickCommand('spawn_villager_librarian')" class="bg-gray-800 hover:bg-indigo-600 text-white px-3 py-2 rounded text-xs transition">Summon Librarian</button>
+                            <button type="button" onclick="quickCommand('spawn_iron_golem')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">Summon Golem</button>
                         </div>
                     </div>
                 </div>
@@ -239,22 +302,25 @@
                     <label class="block text-blue-300 font-semibold mb-2">
                         <i class="fas fa-map-marker-alt"></i> Preset Locations
                     </label>
-                    <div class="space-y-2">
-                        {% for location in locations %}
-                        <button type="button" onclick="teleportTo('{{ location.id }}')" 
-                                class="w-full bg-gray-800 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition text-left border border-gray-700 hover:border-blue-400"
-                                title="{{ location.description }}">
-                            <i class="fas fa-{{ location.icon }} mr-2"></i> 
-                            {{ location.name }} ({{ location.coordinates.x }}, {{ location.coordinates.y }}, {{ location.coordinates.z }})
-                        </button>
-                        {% endfor %}
-                    </div>
+                    <div id="locationsList" class="space-y-2"></div>
                 </div>
             </form>
         </div>
 
         <!-- Find Villages Section -->
-        <div class="bg-b{% if players|length == 0 %}
+        <div class="bg-black bg-opacity-40 backdrop-blur-md rounded-xl shadow-2xl p-6 border border-orange-500">
+            <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                <i class="fas fa-compass text-orange-400 mr-3"></i>
+                Find Villages
+            </h2>
+            
+            <form id="locateForm" class="space-y-4">
+                <div>
+                    <label class="block text-orange-300 font-semibold mb-2">
+                        <i class="fas fa-user"></i> Player
+                    </label>
+                    <select name="player" required class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-orange-500 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none">
+                        {% if players|length == 0 %}
                         <option value="">No players online</option>
                         {% elif players|length == 1 %}
                         <option value="{{ players[0] }}" selected>{{ players[0] }} (Auto-selected)</option>
@@ -264,18 +330,6 @@
                         <option value="{{ player }}">{{ player }}</option>
                         {% endfor %}
                         {% endif %}
-            </h2>
-            
-            <form id="locateForm" class="space-y-4">
-                <div>
-                    <label class="block text-orange-300 font-semibold mb-2">
-                        <i class="fas fa-user"></i> Player
-                    </label>
-                    <select name="player" required class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-orange-500 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none">
-                        <option value="">Select Player</option>
-                        {% for player in players %}
-                        <option value="{{ player }}">{{ player }}</option>
-                        {% endfor %}
                     </select>
                 </div>
 
@@ -296,16 +350,66 @@
 
             <div id="locationResult" class="mt-4 hidden">
                 <div class="bg-green-900 bg-opacity-50 border border-green-500 rounded-lg p-4">
-                    <p c{% if players|length == 0 %}
-                        <option value="">No players online</option>
-                        {% elif players|length == 1 %}
-                        <option value="{{ players[0] }}" selected>{{ players[0] }} (Auto-selected)</option>
-                        {% else %}
-                        <option value="">No specific player</option>
-                        {% for player in players %}
-                        <option value="{{ player }}">{{ player }}</option>
-                        {% endfor %}
-                        {% endif  %}
+                    <p class="text-green-200 font-mono" id="locationText"></p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Manage Locations Section -->
+        <div class="bg-black bg-opacity-40 backdrop-blur-md rounded-xl shadow-2xl p-6 border border-teal-500">
+            <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                <i class="fas fa-map-marked-alt text-teal-300 mr-3"></i>
+                Manage Locations
+            </h2>
+
+            <form id="locationForm" class="space-y-3">
+                <input type="hidden" name="mode" value="create">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">ID (slug)</label>
+                        <input name="id" required class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="village3">
+                    </div>
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">Name</label>
+                        <input name="name" required class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="New Village">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">X</label>
+                        <input name="x" type="number" required class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">Y</label>
+                        <input name="y" type="number" required class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="64">
+                    </div>
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">Z</label>
+                        <input name="z" type="number" required class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">Icon (font-awesome, no fa-)</label>
+                        <input name="icon" class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="home">
+                    </div>
+                    <div>
+                        <label class="block text-teal-200 text-sm mb-1">Description</label>
+                        <input name="description" class="w-full px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="Optional">
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button type="submit" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded font-semibold">Save</button>
+                    <button type="button" id="cancelEdit" class="hidden bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded">Cancel edit</button>
+                </div>
+            </form>
+
+            <div class="mt-4 space-y-2" id="manageLocationsList"></div>
+        </div>
 
         <!-- Custom Command Section -->
         <div class="bg-black bg-opacity-40 backdrop-blur-md rounded-xl shadow-2xl p-6 border border-red-500">
@@ -428,7 +532,15 @@
         console.log('Command Type:', commandType);
         
         // Some commands don't require player selection
-        const noPlayerCommands = ['day', 'night', 'clear_weather', 'rain', 'thunder'];
+        const noPlayerCommands = [
+            'day', 'night', 'clear_weather', 'rain', 'thunder',
+            'difficulty_peaceful', 'difficulty_normal', 'difficulty_hard',
+            'keep_inventory_on', 'keep_inventory_off',
+            'mob_griefing_off', 'mob_griefing_on',
+            'daylight_cycle_off', 'daylight_cycle_on',
+            'worldborder_small', 'worldborder_medium', 'worldborder_large', 'worldborder_infinite',
+            'clear_ground_items', 'spawn_villager_librarian', 'spawn_iron_golem'
+        ];
         
         if (!player && !noPlayerCommands.includes(commandType)) {
             showNotification('Please select a player', 'error');
@@ -524,6 +636,143 @@
             showNotification('Error: ' + error.message, 'error');
         }
     }
+
+    // ---- Locations (DB-backed) ----
+    let editingLocationId = null;
+
+    async function loadLocations() {
+        const list = document.getElementById('locationsList');
+        const manageList = document.getElementById('manageLocationsList');
+        list.innerHTML = '<div class="text-gray-400 text-sm">Loading...</div>';
+        manageList.innerHTML = '';
+        try {
+            const res = await fetch('/api/locations');
+            const data = await res.json();
+            const locations = data.locations || [];
+
+            if (!locations.length) {
+                list.innerHTML = '<div class="text-gray-400 text-sm">No locations saved.</div>';
+                manageList.innerHTML = '<div class="text-gray-400 text-sm">No locations yet.</div>';
+                return;
+            }
+
+            list.innerHTML = locations.map(loc => `
+                <button type="button" onclick="teleportTo('${loc.id}')"
+                        class="w-full bg-gray-800 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition text-left border border-gray-700 hover:border-blue-400"
+                        title="${loc.description || ''}">
+                    <i class="fas fa-${loc.icon || 'map-marker-alt'} mr-2"></i>
+                    ${loc.name} (${loc.coordinates.x}, ${loc.coordinates.y}, ${loc.coordinates.z})
+                </button>
+            `).join('');
+
+            manageList.innerHTML = locations.map(loc => `
+                <div class="flex items-center justify-between bg-gray-900 bg-opacity-60 border border-gray-700 rounded-lg px-3 py-2">
+                    <div class="text-sm text-white">
+                        <div class="font-semibold">${loc.name} <span class="text-gray-400">(${loc.id})</span></div>
+                        <div class="text-gray-300">${loc.coordinates.x}, ${loc.coordinates.y}, ${loc.coordinates.z}</div>
+                        <div class="text-gray-400 text-xs">${loc.description || ''}</div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs" data-action="edit" data-id="${loc.id}">Edit</button>
+                        <button class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-xs" data-action="delete" data-id="${loc.id}">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            attachManageHandlers(locations);
+        } catch (err) {
+            list.innerHTML = '<div class="text-red-400 text-sm">Failed to load locations</div>';
+            manageList.innerHTML = '<div class="text-red-400 text-sm">Failed to load locations</div>';
+        }
+    }
+
+    function attachManageHandlers(locations) {
+        const manageList = document.getElementById('manageLocationsList');
+        manageList.querySelectorAll('[data-action="edit"]').forEach(btn => {
+            const id = btn.dataset.id;
+            const loc = locations.find(l => l.id === id);
+            btn.onclick = () => startEditLocation(loc);
+        });
+        manageList.querySelectorAll('[data-action="delete"]').forEach(btn => {
+            const id = btn.dataset.id;
+            btn.onclick = () => deleteLocation(id);
+        });
+    }
+
+    function startEditLocation(loc) {
+        editingLocationId = loc.id;
+        const form = document.getElementById('locationForm');
+        form.mode.value = 'edit';
+        form.id.value = loc.id;
+        form.id.disabled = true;
+        form.name.value = loc.name;
+        form.icon.value = loc.icon || '';
+        form.description.value = loc.description || '';
+        form.x.value = loc.coordinates.x;
+        form.y.value = loc.coordinates.y;
+        form.z.value = loc.coordinates.z;
+        document.getElementById('cancelEdit').classList.remove('hidden');
+    }
+
+    async function deleteLocation(id) {
+        if (!confirm('Delete location ' + id + '?')) return;
+        await fetch(`/api/locations/${id}`, { method: 'DELETE' });
+        if (editingLocationId === id) resetLocationForm();
+        loadLocations();
+        showNotification('Location deleted');
+    }
+
+    function resetLocationForm() {
+        const form = document.getElementById('locationForm');
+        form.reset();
+        form.mode.value = 'create';
+        form.id.disabled = false;
+        editingLocationId = null;
+        document.getElementById('cancelEdit').classList.add('hidden');
+    }
+
+    document.getElementById('cancelEdit').addEventListener('click', resetLocationForm);
+
+    document.getElementById('locationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const payload = {
+            id: formData.get('id'),
+            name: formData.get('name'),
+            icon: formData.get('icon'),
+            description: formData.get('description'),
+            x: formData.get('x'),
+            y: formData.get('y'),
+            z: formData.get('z'),
+        };
+
+        const method = form.mode.value === 'edit' ? 'PUT' : 'POST';
+        const url = form.mode.value === 'edit' ? `/api/locations/${editingLocationId}` : '/api/locations';
+
+        try {
+            const res = await fetch(url, { method, body: toFormData(payload) });
+            const data = await res.json();
+            if (data.success) {
+                showNotification('Location saved');
+                resetLocationForm();
+                loadLocations();
+            } else {
+                showNotification(data.error || 'Failed to save', 'error');
+            }
+        } catch (err) {
+            showNotification('Failed to save location', 'error');
+        }
+    });
+
+    function toFormData(obj) {
+        const fd = new FormData();
+        Object.entries(obj).forEach(([k, v]) => fd.append(k, v));
+        return fd;
+    }
+
+    // Initial loads
+    loadLocations();
 
     // Custom Command Form
     document.getElementById('commandForm').addEventListener('submit', async (e) => {

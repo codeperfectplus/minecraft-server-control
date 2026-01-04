@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Minecraft Server Control{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-900 via-emerald-800 to-teal-900 min-h-screen">
+    <nav class="bg-black bg-opacity-50 backdrop-blur-md border-b border-green-500 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-cube text-green-400 text-3xl"></i>
+                    <h1 class="text-2xl font-bold text-white">Minecraft Server Control</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="player-count" class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                        <i class="fas fa-users"></i> <span id="count">0</span> Players
+                    </span>
+                    <button onclick="refreshPlayers()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-4 rounded-lg shadow-lg fade-in z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        async function refreshPlayers() {
+            try {
+                const response = await fetch('/api/players');
+                const data = await response.json();
+                
+                // Update player count
+                document.getElementById('count').textContent = data.count;
+                
+                // Update player dropdowns
+                const selects = document.querySelectorAll('select[name="player"]');
+                selects.forEach(select => {
+                    const currentValue = select.value;
+                    const isRequired = select.hasAttribute('required');
+                    
+                    if (data.count === 0) {
+                        select.innerHTML = '<option value="">No players online</option>';
+                    } else if (data.count === 1) {
+                        // Auto-select single player
+                        select.innerHTML = `<option value="${data.players[0]}" selected>${data.players[0]} (Auto-selected)</option>`;
+                    } else {
+                        // Multiple players - show dropdown
+                        const defaultText = isRequired ? 'Select Player' : 'No specific player';
+                        select.innerHTML = `<option value="">${defaultText}</option>` +
+                            data.players.map(p => `<option value="${p}" ${p === currentValue ? 'selected' : ''}>${p}</option>`).join('');
+                    }
+                });
+                
+                showNotification(`Updated: ${data.count} player(s) online`);
+            } catch (error) {
+                showNotification('Failed to refresh players', 'error');
+            }
+        }
+
+        // Auto-refresh players every 10 seconds
+        setInterval(refreshPlayers, 10000);
+        
+        // Initial load
+        window.addEventListener('load', refreshPlayers);
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

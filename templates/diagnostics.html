@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCON Diagnostics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen p-8">
+    <div class="container mx-auto max-w-4xl">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
+            <h1 class="text-3xl font-bold text-white mb-6 flex items-center">
+                <i class="fas fa-stethoscope text-blue-400 mr-3"></i>
+                RCON Connection Diagnostics
+            </h1>
+
+            <button onclick="testConnection()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold mb-6 transition">
+                <i class="fas fa-sync-alt"></i> Test Connection
+            </button>
+
+            <div id="results" class="space-y-4"></div>
+
+            <div class="mt-8 bg-gray-900 rounded-lg p-6 border border-gray-700">
+                <h2 class="text-xl font-bold text-white mb-4">
+                    <i class="fas fa-question-circle text-yellow-400 mr-2"></i>
+                    Setup Instructions
+                </h2>
+                
+                <div class="space-y-4 text-gray-300">
+                    <div>
+                        <h3 class="font-bold text-green-400 mb-2">Method 1: Automated Setup (Linux/Mac)</h3>
+                        <div class="bg-black rounded p-3 font-mono text-sm">
+                            chmod +x setup_rcon.sh<br>
+                            ./setup_rcon.sh
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-green-400 mb-2">Method 2: Manual Setup</h3>
+                        <ol class="list-decimal list-inside space-y-2 ml-2">
+                            <li>Find your Minecraft <code class="bg-gray-700 px-2 py-1 rounded">server.properties</code> file</li>
+                            <li>Open it in a text editor</li>
+                            <li>Add or update these lines:
+                                <div class="bg-black rounded p-3 font-mono text-sm mt-2">
+                                    enable-rcon=true<br>
+                                    rcon.port=25575<br>
+                                    rcon.password=your_password_here<br>
+                                    broadcast-rcon-to-ops=true
+                                </div>
+                            </li>
+                            <li>Save the file and <strong>restart your Minecraft server</strong></li>
+                            <li>Update your <code class="bg-gray-700 px-2 py-1 rounded">.env</code> file:
+                                <div class="bg-black rounded p-3 font-mono text-sm mt-2">
+                                    RCON_HOST=localhost<br>
+                                    RCON_PORT=25575<br>
+                                    RCON_PASSWORD=your_password_here
+                                </div>
+                            </li>
+                            <li>Restart this Flask app</li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-yellow-900 bg-opacity-30 border border-yellow-600 rounded p-4">
+                        <h3 class="font-bold text-yellow-400 mb-2">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Common Issues
+                        </h3>
+                        <ul class="list-disc list-inside space-y-1 ml-2 text-sm">
+                            <li><strong>Connection refused:</strong> Minecraft server is not running</li>
+                            <li><strong>Authentication failed:</strong> Wrong password in .env file</li>
+                            <li><strong>Timeout:</strong> Wrong host/port or firewall blocking port 25575</li>
+                            <li><strong>Empty password:</strong> Set a password in both server.properties and .env</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-blue-900 bg-opacity-30 border border-blue-600 rounded p-4">
+                        <h3 class="font-bold text-blue-400 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Finding Your Minecraft Server
+                        </h3>
+                        <p class="text-sm mb-2">Common locations:</p>
+                        <ul class="list-disc list-inside space-y-1 ml-2 text-sm font-mono">
+                            <li>~/minecraft/</li>
+                            <li>~/minecraft-server/</li>
+                            <li>/opt/minecraft/</li>
+                            <li>~/.minecraft/server/</li>
+                        </ul>
+                        <p class="text-sm mt-3">Or search for it:</p>
+                        <div class="bg-black rounded p-3 font-mono text-sm mt-2">
+                            find ~ -name "server.properties" 2>/dev/null
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="text-white"><i class="fas fa-spinner fa-spin mr-2"></i> Testing connection...</div>';
+
+            try {
+                const response = await fetch('/api/test-connection');
+                const data = await response.json();
+
+                let html = '<div class="space-y-3">';
+
+                // Connection Status
+                html += `<div class="p-4 rounded-lg ${data.connected ? 'bg-green-900 border border-green-500' : 'bg-red-900 border border-red-500'}">
+                    <h3 class="font-bold ${data.connected ? 'text-green-300' : 'text-red-300'} mb-2">
+                        <i class="fas fa-${data.connected ? 'check-circle' : 'times-circle'} mr-2"></i>
+                        ${data.connected ? 'Connection Successful' : 'Connection Failed'}
+                    </h3>
+                </div>`;
+
+                // Configuration Details
+                html += '<div class="bg-gray-700 p-4 rounded-lg">';
+                html += '<h3 class="font-bold text-white mb-3">Configuration:</h3>';
+                html += '<div class="space-y-2 text-sm font-mono">';
+                html += `<div class="flex justify-between">
+                    <span class="text-gray-400">Host:</span>
+                    <span class="text-white">${data.host}</span>
+                </div>`;
+                html += `<div class="flex justify-between">
+                    <span class="text-gray-400">Port:</span>
+                    <span class="text-white">${data.port}</span>
+                </div>`;
+                html += `<div class="flex justify-between">
+                    <span class="text-gray-400">Password Set:</span>
+                    <span class="${data.password_set ? 'text-green-400' : 'text-red-400'}">
+                        ${data.password_set ? '✓ Yes' : '✗ No'}
+                    </span>
+                </div>`;
+                if (data.password_set) {
+                    html += `<div class="flex justify-between">
+                        <span class="text-gray-400">Password Length:</span>
+                        <span class="text-white">${data.password_length} characters</span>
+                    </div>`;
+                }
+                html += '</div></div>';
+
+                // Server Response
+                html += '<div class="bg-gray-700 p-4 rounded-lg">';
+                html += '<h3 class="font-bold text-white mb-3">Server Response:</h3>';
+                html += `<pre class="text-sm ${data.connected ? 'text-green-300' : 'text-red-300'} overflow-x-auto">${data.response}</pre>`;
+                html += '</div>';
+
+                // Recommendations
+                if (!data.connected) {
+                    html += '<div class="bg-orange-900 border border-orange-500 p-4 rounded-lg">';
+                    html += '<h3 class="font-bold text-orange-300 mb-3"><i class="fas fa-lightbulb mr-2"></i>What to do:</h3>';
+                    html += '<ol class="list-decimal list-inside space-y-2 text-orange-200 text-sm">';
+                    
+                    if (!data.password_set) {
+                        html += '<li><strong>Set RCON password:</strong> Edit .env file and add RCON_PASSWORD=your_password</li>';
+                    }
+                    
+                    if (data.response.includes('Connection refused')) {
+                        html += '<li><strong>Start Minecraft server:</strong> Make sure your Minecraft server is running</li>';
+                    } else if (data.response.includes('Authentication failed')) {
+                        html += '<li><strong>Check password:</strong> Password in .env must match server.properties</li>';
+                    } else if (data.response.includes('timed out')) {
+                        html += '<li><strong>Check firewall:</strong> Ensure port 25575 is not blocked</li>';
+                    }
+                    
+                    html += '<li>Run <code class="bg-black px-2 py-1 rounded">./setup_rcon.sh</code> for automated setup</li>';
+                    html += '<li>After fixing, restart both Minecraft server AND this Flask app</li>';
+                    html += '</ol></div>';
+                }
+
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="bg-red-900 border border-red-500 p-4 rounded-lg text-red-300">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Error testing connection: ${error.message}
+                </div>`;
+            }
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', testConnection);
+    </script>
+</body>
+</html>

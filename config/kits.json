@@ -1,0 +1,127 @@
+{
+  "kits": [
+    {
+      "id": "starter",
+      "name": "Starter Kit",
+      "icon": "flag-checkered",
+      "color": "green",
+      "description": "Essential items for new players",
+      "items": [
+        {"item": "cooked_beef", "amount": 64},
+        {"item": "torch", "amount": 256},
+        {"item": "ender_pearl", "amount": 16},
+        {"item": "compass", "amount": 1},
+        {"item": "shield", "amount": 1},
+        {"item": "oak_boat", "amount": 1},
+        {"item": "bed", "amount": 1}
+      ]
+    },
+    {
+      "id": "tools",
+      "name": "Tools Kit",
+      "icon": "tools",
+      "color": "blue",
+      "description": "Full set of diamond tools",
+      "items": [
+        {"item": "diamond_pickaxe", "amount": 1},
+        {"item": "diamond_axe", "amount": 1},
+        {"item": "diamond_shovel", "amount": 1},
+        {"item": "diamond_sword", "amount": 1},
+        {"item": "bow", "amount": 1},
+        {"item": "arrow", "amount": 64}
+      ]
+    },
+    {
+      "id": "armor",
+      "name": "Diamond Armor",
+      "icon": "vest",
+      "color": "cyan",
+      "description": "Full diamond armor set",
+      "items": [
+        {"item": "diamond_helmet", "amount": 1},
+        {"item": "diamond_chestplate", "amount": 1},
+        {"item": "diamond_leggings", "amount": 1},
+        {"item": "diamond_boots", "amount": 1}
+      ]
+    },
+    {
+      "id": "netherite",
+      "name": "Netherite Set",
+      "icon": "chess-rook",
+      "color": "gray",
+      "description": "Full netherite gear",
+      "items": [
+        {"item": "netherite_helmet", "amount": 1},
+        {"item": "netherite_chestplate", "amount": 1},
+        {"item": "netherite_leggings", "amount": 1},
+        {"item": "netherite_boots", "amount": 1},
+        {"item": "netherite_sword", "amount": 1},
+        {"item": "netherite_pickaxe", "amount": 1}
+      ]
+    },
+    {
+      "id": "explorer",
+      "name": "Explorer Kit",
+      "icon": "compass",
+      "color": "yellow",
+      "description": "Everything needed for exploration",
+      "items": [
+        {"item": "cooked_beef", "amount": 64},
+        {"item": "torch", "amount": 256},
+        {"item": "ender_pearl", "amount": 16},
+        {"item": "water_bucket", "amount": 2},
+        {"item": "oak_boat", "amount": 1},
+        {"item": "bed", "amount": 1},
+        {"item": "compass", "amount": 1},
+        {"item": "map", "amount": 1},
+        {"item": "spyglass", "amount": 1}
+      ]
+    },
+    {
+      "id": "builder",
+      "name": "Builder Kit",
+      "icon": "hammer",
+      "color": "orange",
+      "description": "Building essentials",
+      "items": [
+        {"item": "oak_planks", "amount": 64},
+        {"item": "stone", "amount": 64},
+        {"item": "glass", "amount": 64},
+        {"item": "torch", "amount": 128},
+        {"item": "chest", "amount": 16},
+        {"item": "crafting_table", "amount": 4},
+        {"item": "furnace", "amount": 4}
+      ]
+    },
+    {
+      "id": "resources",
+      "name": "Resources Kit",
+      "icon": "gem",
+      "color": "purple",
+      "description": "Raw materials and gems",
+      "items": [
+        {"item": "coal", "amount": 64},
+        {"item": "raw_copper", "amount": 64},
+        {"item": "raw_iron", "amount": 64},
+        {"item": "raw_gold", "amount": 64},
+        {"item": "diamond", "amount": 64},
+        {"item": "emerald", "amount": 64},
+        {"item": "netherite_ingot", "amount": 16}
+      ]
+    },
+    {
+      "id": "potions",
+      "name": "Potions Kit",
+      "icon": "flask",
+      "color": "pink",
+      "description": "Useful potions",
+      "items": [
+        {"item": "potion{Potion:\"minecraft:strong_healing\"}", "amount": 16},
+        {"item": "potion{Potion:\"minecraft:regeneration\"}", "amount": 8},
+        {"item": "potion{Potion:\"minecraft:swiftness\"}", "amount": 8},
+        {"item": "potion{Potion:\"minecraft:strength\"}", "amount": 8},
+        {"item": "potion{Potion:\"minecraft:fire_resistance\"}", "amount": 8}
+      ]
+    }
+  ]
+}

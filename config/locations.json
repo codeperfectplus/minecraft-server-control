@@ -1,0 +1,48 @@
+{
+  "locations": [
+    {
+      "id": "base",
+      "name": "Base",
+      "icon": "home",
+      "coordinates": {
+        "x": 392,
+        "y": 61,
+        "z": 297
+      },
+      "description": "Main base location"
+    },
+    {
+      "id": "village1",
+      "name": "Village 1",
+      "icon": "city",
+      "coordinates": {
+        "x": -1360,
+        "y": 70,
+        "z": 637
+      },
+      "description": "First village"
+    },
+    {
+      "id": "village2",
+      "name": "Village 2",
+      "icon": "city",
+      "coordinates": {
+        "x": -3777,
+        "y": 63,
+        "z": 3823
+      },
+      "description": "Second village"
+    },
+    {
+      "id": "ice_area",
+      "name": "Ice Area",
+      "icon": "snowflake",
+      "coordinates": {
+        "x": 427,
+        "y": 85,
+        "z": -39
+      },
+      "description": "Ice biome area"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from rcon_client import run_command, get_online_players
 from commands import ITEMS, VILLAGE_TYPES
+from collections import OrderedDict
+import re
 import json
 import os
 import sqlite3
@@ -9,6 +11,13 @@ app = Flask(__name__)
 
 # Allow overriding DB path via env so container volume mounts can control location
 DB_PATH = os.environ.get("DB_PATH", "/app/data/data.db")
+
+# Quick lookup for item metadata
+ITEM_INDEX = {
+    item["name"]: {**item, "category": category}
+    for category, items in ITEMS.items()
+    for item in items
+}
 
 
 def get_db():
@@ -40,6 +49,15 @@ def init_db():
             x INTEGER NOT NULL,
             y INTEGER NOT NULL,
             z INTEGER NOT NULL
+        )
+        """
+    )
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS item_usage (
+            item TEXT PRIMARY KEY,
+            used_count INTEGER NOT NULL DEFAULT 0,
+            last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
     )
@@ -96,6 +114,67 @@ def fetch_locations():
     ]
 
 
+def record_item_usage(item_name, amount=1):
+    """Persist item usage counts for quick-access ordering."""
+    if item_name not in ITEM_INDEX:
+        return
+    try:
+        amount_int = max(int(amount), 1)
+    except (TypeError, ValueError):
+        amount_int = 1
+
+    db = get_db()
+    db.execute(
+        """
+        INSERT INTO item_usage (item, used_count, last_used)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(item) DO UPDATE SET
+            used_count = item_usage.used_count + excluded.used_count,
+            last_used = CURRENT_TIMESTAMP
+        """,
+        (item_name, amount_int),
+    )
+    db.commit()
+
+
+def fetch_usage_counts():
+    db = get_db()
+    rows = db.execute("SELECT item, used_count FROM item_usage").fetchall()
+    return {row["item"]: row["used_count"] for row in rows}
+
+
+def get_top_used_items(usage_counts, limit=8):
+    ranked = sorted(
+        ((name, count) for name, count in usage_counts.items() if name in ITEM_INDEX),
+        key=lambda pair: (-pair[1], ITEM_INDEX[pair[0]].get("display", pair[0])),
+    )
+    top = []
+    for name, count in ranked[:limit]:
+        entry = {**ITEM_INDEX[name], "used_count": count}
+        top.append(entry)
+    return top
+
+
+def build_item_catalog():
+    """Return ordered item categories with optional usage data."""
+    usage_counts = fetch_usage_counts()
+    catalog = OrderedDict()
+
+    top_items = get_top_used_items(usage_counts)
+    if top_items:
+        catalog["Most Used"] = top_items
+
+    for category, items in ITEMS.items():
+        catalog[category] = []
+        for item in items:
+            entry = dict(item)
+            used = usage_counts.get(item["name"])
+            if used:
+                entry["used_count"] = used
+            catalog[category].append(entry)
+    return catalog
+
+
 def upsert_location(data):
     db = get_db()
     db.execute(
@@ -129,12 +208,14 @@ KITS_CONFIG = load_json_config('kits.json')
 @app.route("/")
 def dashboard():
     players = get_online_players()
-    return render_template("dashboard.html", 
-                         players=players,
-                         items=ITEMS,
-                         village_types=VILLAGE_TYPES,
-                         locations=fetch_locations(),
-                         kits=KITS_CONFIG.get('kits', []))
+    return render_template(
+        "dashboard.html",
+        players=players,
+        items=build_item_catalog(),
+        village_types=VILLAGE_TYPES,
+        locations=fetch_locations(),
+        kits=KITS_CONFIG.get("kits", []),
+    )
 
 @app.route("/diagnostics")
 def diagnostics():
@@ -212,6 +293,29 @@ def api_location_detail(loc_id):
     upsert_location(payload)
     return jsonify({"success": True})
 
+
+@app.route("/api/player-location", methods=["POST"])
+def api_player_location():
+    player = request.form.get("player") if request.form else (request.json or {}).get("player")
+    if not player:
+        return jsonify({"success": False, "error": "Player is required"}), 400
+
+    result = run_command(f"/data get entity {player} Pos")
+    if str(result).startswith("Error"):
+        return jsonify({"success": False, "error": result}), 400
+
+    match = re.search(r"\[(.*?)\]", str(result))
+    if not match:
+        return jsonify({"success": False, "error": "Could not parse position"}), 400
+
+    try:
+        parts = [p.strip().rstrip('d') for p in match.group(1).split(',')]
+        x, y, z = (int(float(p)) for p in parts[:3])
+    except Exception:
+        return jsonify({"success": False, "error": "Could not parse position"}), 400
+
+    return jsonify({"success": True, "coordinates": {"x": x, "y": y, "z": z}})
+
 @app.route("/command", methods=["POST"])
 def execute_command():
     """Execute any Minecraft command"""
@@ -249,12 +353,37 @@ def teleport():
         print(f"ERROR: Location not found: {location_id}")
         return jsonify({"success": False, "error": "Location not found"})
 
+
+@app.route("/tp/coordinates", methods=["POST"])
+def teleport_coordinates():
+    print("\n=== TELEPORT COORD REQUEST ===")
+    player = request.form.get("player")
+    try:
+        x = int(request.form.get("x"))
+        y = int(request.form.get("y"))
+        z = int(request.form.get("z"))
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "error": "Coordinates must be numbers"}), 400
+
+    if not player:
+        return jsonify({"success": False, "error": "Player is required"}), 400
+
+    cmd = f"/tp {player} {x} {y} {z}"
+    print(f"Executing coord teleport: {cmd}")
+    result = run_command(cmd)
+    print(f"RCON result: {result}")
+    return jsonify({"success": True, "result": result})
+
 @app.route("/give", methods=["POST"])
 def give_item():
     print("\n=== GIVE ITEM REQUEST ===")
     player = request.form.get("player")
     item = request.form.get("item")
-    amount = request.form.get("amount", 1)
+    amount_raw = request.form.get("amount", 1)
+    try:
+        amount = max(1, min(64, int(amount_raw)))
+    except (TypeError, ValueError):
+        amount = 1
     print(f"Player: {player}")
     print(f"Item: {item}")
     print(f"Amount: {amount}")
@@ -262,6 +391,8 @@ def give_item():
     print(f"Executing command: {cmd}")
     result = run_command(cmd)
     print(f"RCON result: {result}")
+    if not str(result).startswith("Error"):
+        record_item_usage(item, amount)
     return jsonify({"success": True, "result": result})
 
 @app.route("/locate", methods=["POST"])
@@ -356,6 +487,8 @@ def give_kit(kit_id):
             result = run_command(cmd)
             print(f"Result: {result}")
             results.append(result)
+            if not str(result).startswith("Error"):
+                record_item_usage(item_data["item"], item_data["amount"])
         return jsonify({"success": True, "results": results})
     
     print(f"ERROR: Kit not found: {kit_id}")

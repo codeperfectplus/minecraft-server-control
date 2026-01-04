@@ -1,8 +1,5 @@
 PRESETS = {
-    "base": "392 61 297",
-    "village1": "-1360 70 637",
-    "village2": "-3777 63 3823",
-    "ice_area": "427 85 -39",
+    "base": "-912 63 -769",
 }
 
 VILLAGE_TYPES = [
@@ -32,20 +29,12 @@ ITEMS = {
     ],
     "Weapons (power coded)": [
         {"name": "netherite_sword", "display": "⬛ Netherite Sword", "icon": "⚔️"},
-        {"name": "netherite_axe", "display": "⬛ Netherite Axe", "icon": "🪓"},
-        {"name": "netherite_hoe", "display": "⬛ Netherite Hoe (Mace)", "icon": "🪓"},
         {"name": "diamond_sword", "display": "💎 Diamond Sword", "icon": "⚔️"},
-        {"name": "diamond_axe", "display": "💎 Diamond Axe", "icon": "🪓"},
-        {"name": "diamond_trident", "display": "💎 Trident", "icon": "🔱"},
-        {"name": "iron_sword", "display": "⚪ Iron Sword", "icon": "⚔️"},
-        {"name": "iron_axe", "display": "⚪ Iron Axe", "icon": "🪓"},
-        {"name": "stone_sword", "display": "⬛ Stone Sword", "icon": "⚔️"},
-        {"name": "stone_axe", "display": "⬛ Stone Axe", "icon": "🪓"},
-        {"name": "golden_sword", "display": "🟡 Golden Sword", "icon": "⚔️"},
-        {"name": "golden_axe", "display": "🟡 Golden Axe", "icon": "🪓"},
-        {"name": "wooden_sword", "display": "🟤 Wooden Sword", "icon": "⚔️"},
-        {"name": "wooden_axe", "display": "🟤 Wooden Axe", "icon": "🪓"},
         {"name": "trident", "display": "💠 Trident", "icon": "🔱"},
+        {"name": "iron_sword", "display": "⚪ Iron Sword", "icon": "⚔️"},
+        {"name": "stone_sword", "display": "⬛ Stone Sword", "icon": "⚔️"},
+        {"name": "golden_sword", "display": "🟡 Golden Sword", "icon": "⚔️"},
+        {"name": "wooden_sword", "display": "🟤 Wooden Sword", "icon": "⚔️"},
         {"name": "crossbow", "display": "🟦 Crossbow", "icon": "🏹"},
         {"name": "bow", "display": "🟩 Bow", "icon": "🏹"},
         {"name": "fire_charge", "display": "🔥 Fire Charge", "icon": "🔥"},
@@ -91,6 +80,7 @@ ITEMS = {
         {"name": "shears", "display": "✂️ Shears", "icon": "✂️"},
         {"name": "flint_and_steel", "display": "🔥 Flint and Steel", "icon": "🔥"},
         {"name": "brush", "display": "🪥 Brush", "icon": "🪥"},
+        {"name": "iron_shovel", "display": "⚪ Iron Shovel", "icon": "🛠️"},
     ],
     "Armor": [
         {"name": "diamond_helmet", "display": "Diamond Helmet", "icon": "⛑️"},

@@ -50,7 +50,12 @@
                             {% for item in items_list %}
                             <button type="button" onclick="giveItem('{{ item.name }}')" 
                                     class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition transform hover:scale-105 border border-gray-700 hover:border-green-400">
-                                <span class="text-xl">{{ item.icon }}</span>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xl">{{ item.icon }}</span>
+                                    {% if item.used_count %}
+                                    <span class="text-[10px] bg-green-700 text-white px-2 py-0.5 rounded-full">{{ item.used_count }}x</span>
+                                    {% endif %}
+                                </div>
                                 <div class="text-xs mt-1">{{ item.display }}</div>
                             </button>
                             {% endfor %}
@@ -294,6 +299,20 @@
                     </label>
                     <div id="locationsList" class="space-y-2"></div>
                 </div>
+
+                <div class="pt-4 mt-4 border-t border-blue-800">
+                    <label class="block text-blue-300 font-semibold mb-3">
+                        <i class="fas fa-crosshairs"></i> Direct Coordinates
+                    </label>
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <input name="x" type="number" placeholder="X" class="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-blue-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        <input name="y" type="number" placeholder="Y" class="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-blue-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                        <input name="z" type="number" placeholder="Z" class="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-blue-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                    </div>
+                    <button type="button" onclick="teleportToCoords()" class="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-lg font-semibold transition transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-location-crosshairs mr-2"></i> Teleport to Coordinates
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -352,6 +371,25 @@
                 <i class="fas fa-map-marked-alt text-teal-300 mr-3"></i>
                 Manage Locations
             </h2>
+
+            <div class="mb-4 p-3 bg-gray-900 bg-opacity-50 border border-teal-600 rounded-lg">
+                <h3 class="text-sm font-semibold text-teal-200 mb-2 flex items-center"><i class="fas fa-crosshairs mr-2"></i>Capture Player Position</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <select id="capturePlayer" class="px-3 py-2 bg-gray-800 text-white rounded border border-teal-500">
+                        {% if players|length == 0 %}
+                        <option value="">No players online</option>
+                        {% else %}
+                        <option value="">Select player</option>
+                        {% for player in players %}
+                        <option value="{{ player }}">{{ player }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                    <input id="captureName" class="px-3 py-2 bg-gray-800 text-white rounded border border-teal-500" placeholder="Location name (e.g., Home Base)">
+                    <button type="button" onclick="captureAndSaveLocation()" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded font-semibold">Capture & Save</button>
+                </div>
+                <p class="text-xs text-teal-200 mt-2">Fetches the player's current coordinates and saves directly into presets.</p>
+            </div>
 
             <form id="locationForm" class="space-y-3">
                 <input type="hidden" name="mode" value="create">
@@ -595,6 +633,45 @@
         }
     }
 
+    // Teleport to direct coordinates
+    async function teleportToCoords() {
+        const form = document.getElementById('teleportForm');
+        const player = form.player.value;
+        const x = form.querySelector('input[name="x"]').value;
+        const y = form.querySelector('input[name="y"]').value;
+        const z = form.querySelector('input[name="z"]').value;
+
+        if (!player) {
+            showNotification('Please select a player', 'error');
+            return;
+        }
+        if (x === '' || y === '' || z === '') {
+            showNotification('Enter X, Y, and Z coordinates', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('player', player);
+        formData.append('x', x);
+        formData.append('y', y);
+        formData.append('z', z);
+
+        try {
+            const response = await fetch('/tp/coordinates', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                showNotification(`Teleported ${player} to ${x}, ${y}, ${z}`);
+            } else {
+                showNotification(data.error || 'Failed to teleport', 'error');
+            }
+        } catch (error) {
+            showNotification('Error: ' + error.message, 'error');
+        }
+    }
+
     // Locate Village Function
     async function locateVillage(villageType) {
         const form = document.getElementById('locateForm');
@@ -759,6 +836,60 @@
         const fd = new FormData();
         Object.entries(obj).forEach(([k, v]) => fd.append(k, v));
         return fd;
+    }
+
+    function slugifyName(name) {
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        return slug || `loc-${Date.now()}`;
+    }
+
+    async function captureAndSaveLocation() {
+        const player = document.getElementById('capturePlayer').value;
+        const name = document.getElementById('captureName').value.trim();
+
+        if (!player) {
+            showNotification('Select a player to capture position', 'error');
+            return;
+        }
+        if (!name) {
+            showNotification('Enter a name for the location', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('player', player);
+
+        try {
+            const posRes = await fetch('/api/player-location', { method: 'POST', body: formData });
+            const posData = await posRes.json();
+            if (!posData.success) {
+                showNotification(posData.error || 'Failed to fetch position', 'error');
+                return;
+            }
+
+            const coords = posData.coordinates;
+            const payload = {
+                id: slugifyName(name),
+                name,
+                icon: 'map-marker-alt',
+                description: '',
+                x: coords.x,
+                y: coords.y,
+                z: coords.z,
+            };
+
+            const saveRes = await fetch('/api/locations', { method: 'POST', body: toFormData(payload) });
+            const saveData = await saveRes.json();
+            if (saveData.success) {
+                showNotification('Location saved');
+                document.getElementById('captureName').value = '';
+                loadLocations();
+            } else {
+                showNotification(saveData.error || 'Failed to save location', 'error');
+            }
+        } catch (err) {
+            showNotification('Error capturing location: ' + err.message, 'error');
+        }
     }
 
     // Initial loads

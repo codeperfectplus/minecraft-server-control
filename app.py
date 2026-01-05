@@ -61,6 +61,19 @@ def init_db():
         )
         """
     )
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS error_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            command_type TEXT NOT NULL,
+            command TEXT NOT NULL,
+            error_message TEXT NOT NULL,
+            player TEXT,
+            endpoint TEXT
+        )
+        """
+    )
     db.commit()
 
 
@@ -70,8 +83,10 @@ def load_json_config(filename):
         with open(config_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
+        print(f"Warning: Config file not found: {config_path}")
         return {}
     except json.JSONDecodeError:
+        print(f"Error: Could not parse JSON config file: {config_path}")
         return {}
 
 
@@ -143,6 +158,49 @@ def fetch_usage_counts():
     return {row["item"]: row["used_count"] for row in rows}
 
 
+def log_error(command_type, command, error_message, player=None, endpoint=None):
+    """Log command errors to database for debugging and monitoring."""
+    try:
+        db = get_db()
+        db.execute(
+            """
+            INSERT INTO error_logs (command_type, command, error_message, player, endpoint)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (command_type, command, error_message, player, endpoint),
+        )
+        db.commit()
+        print(f"[ERROR_LOG] {command_type}: {error_message}")
+    except Exception as e:
+        print(f"Failed to log error: {e}")
+
+
+def get_error_logs(limit=50):
+    """Retrieve recent error logs."""
+    db = get_db()
+    rows = db.execute(
+        """
+        SELECT id, timestamp, command_type, command, error_message, player, endpoint
+        FROM error_logs
+        ORDER BY timestamp DESC
+        LIMIT ?
+        """,
+        (limit,)
+    ).fetchall()
+    return [
+        {
+            "id": row["id"],
+            "timestamp": row["timestamp"],
+            "command_type": row["command_type"],
+            "command": row["command"],
+            "error_message": row["error_message"],
+            "player": row["player"],
+            "endpoint": row["endpoint"],
+        }
+        for row in rows
+    ]
+
+
 def get_top_used_items(usage_counts, limit=8):
     ranked = sorted(
         ((name, count) for name, count in usage_counts.items() if name in ITEM_INDEX),
@@ -207,6 +265,7 @@ KITS_CONFIG = load_json_config('kits.json')
 
 # Load quick commands
 QUICK_COMMANDS = load_json_config('quick_commands.json')
+print(f"Loaded {len(QUICK_COMMANDS) if isinstance(QUICK_COMMANDS, list) else 0} quick commands.")
 
 @app.route("/")
 def dashboard():
@@ -225,6 +284,33 @@ def dashboard():
 def diagnostics():
     """RCON diagnostics page"""
     return render_template("diagnostics.html")
+
+
+@app.route("/api/error-logs")
+def api_error_logs():
+    """API endpoint to retrieve error logs"""
+    limit = request.args.get('limit', 50, type=int)
+    logs = get_error_logs(limit)
+    return jsonify({"success": True, "logs": logs})
+
+
+@app.route("/error-logs")
+def error_logs_page():
+    """Dedicated error logs page"""
+    return render_template("error_logs.html")
+
+
+@app.route("/api/error-logs/clear", methods=["POST"])
+def clear_error_logs():
+    """Clear all error logs"""
+    try:
+        db = get_db()
+        db.execute("DELETE FROM error_logs")
+        db.commit()
+        return jsonify({"success": True, "message": "All error logs cleared"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 
 @app.route("/player")
 def player():
@@ -444,9 +530,28 @@ def teleport():
         print(f"Executing command: {cmd}")
         result = run_command(cmd)
         print(f"RCON result: {result}")
+        
+        # Log teleport errors
+        from rcon_client import is_rcon_error
+        if is_rcon_error(result):
+            log_error(
+                command_type="teleport",
+                command=cmd,
+                error_message=result,
+                player=player,
+                endpoint="/tp"
+            )
+        
         return jsonify({"success": True, "result": result})
     else:
         print(f"ERROR: Location not found: {location_id}")
+        log_error(
+            command_type="teleport",
+            command="N/A",
+            error_message=f"Location not found: {location_id}",
+            player=player,
+            endpoint="/tp"
+        )
         return jsonify({"success": False, "error": "Location not found"})
 
 
@@ -487,15 +592,40 @@ def give_item():
     print(f"Executing command: {cmd}")
     result = run_command(cmd)
     print(f"RCON result: {result}")
-    if not str(result).startswith("Error"):
+    
+    # Log errors and only record usage if successful
+    from rcon_client import is_rcon_error
+    if is_rcon_error(result):
+        log_error(
+            command_type="give_item",
+            command=cmd,
+            error_message=result,
+            player=player,
+            endpoint="/give"
+        )
+    else:
         record_item_usage(item, amount)
+    
     return jsonify({"success": True, "result": result})
 
 @app.route("/locate", methods=["POST"])
 def locate_village():
     player = request.form["player"]
     village_type = request.form["village_type"]
-    result = run_command(f"/execute as {player} run locate structure minecraft:village_{village_type}")
+    cmd = f"/execute as {player} run locate structure minecraft:village_{village_type}"
+    result = run_command(cmd)
+    
+    # Log locate errors
+    from rcon_client import is_rcon_error
+    if is_rcon_error(result):
+        log_error(
+            command_type="locate_village",
+            command=cmd,
+            error_message=result,
+            player=player,
+            endpoint="/locate"
+        )
+    
     return jsonify({"success": True, "result": result})
 
 @app.route("/quick-command", methods=["POST"])
@@ -568,8 +698,22 @@ def quick_command():
         "hero_of_village": f"/effect give {player} minecraft:hero_of_the_village 1200 0",
         
         # Village Helpers
+        "spawn_villager_farmer": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:farmer\",type:\"minecraft:plains\",level:5}}",
         "spawn_villager_librarian": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:librarian\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_cleric": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:cleric\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_armorer": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:armorer\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_weaponsmith": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:weaponsmith\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_toolsmith": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:toolsmith\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_butcher": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:butcher\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_cartographer": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:cartographer\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_fisherman": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:fisherman\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_fletcher": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:fletcher\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_shepherd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:shepherd\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_leatherworker": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:leatherworker\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_mason": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:mason\",type:\"minecraft:plains\",level:5}}",
+        "spawn_villager_nitwit": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:nitwit\",type:\"minecraft:plains\",level:5}}",
         "spawn_iron_golem": "/summon iron_golem ~ ~ ~",
+        "spawn_cat": "/summon cat ~ ~ ~ {CatType:0}",
         
         # Mob Control
         "kill_hostile_mobs": "/kill @e[type=!player,type=!item,type=!villager,type=!iron_golem,type=!horse,type=!cat,type=!wolf,type=!parrot,type=!donkey,type=!mule,type=!llama,type=!trader_llama]",
@@ -579,11 +723,11 @@ def quick_command():
         "clear_ground_items": "/kill @e[type=item]",
         
         # Advanced Player
-        "full_restore": f"/effect give {player} minecraft:instant_health 1 10 /effect give {player} minecraft:saturation 1 10 /effect clear {player}",
+        "full_restore": f"/effect give {player} minecraft:instant_health 1 10",
         "fly_mode": f"/effect give {player} minecraft:levitation 1000000 255 true",
         "fly_enable": f"/effect give {player} minecraft:levitation 1000000 255 true",
         "fly_disable": f"/effect clear {player} minecraft:levitation",
-        "godmode_on": f"/effect give {player} minecraft:resistance 1000000 255 true /effect give {player} minecraft:fire_resistance 1000000 0 true /effect give {player} minecraft:water_breathing 1000000 0 true",
+        "godmode_on": f"/effect give {player} minecraft:resistance 1000000 255 true",
         "max_health": f"/attribute {player} minecraft:generic.max_health base set 1024",
         "full_health": f"/effect give {player} minecraft:regeneration 10 255",
     }
@@ -600,6 +744,14 @@ def quick_command():
         # Check for RCON errors
         if is_rcon_error(result):
             print(f"Command failed: {result}")
+            # Log the error
+            log_error(
+                command_type=command_type,
+                command=cmd,
+                error_message=result,
+                player=player,
+                endpoint="/quick-command"
+            )
             return jsonify({
                 "success": False, 
                 "error": result,
@@ -613,6 +765,14 @@ def quick_command():
         })
     
     print(f"ERROR: Unknown command type: {command_type}")
+    # Log unknown command type
+    log_error(
+        command_type=command_type,
+        command="N/A",
+        error_message=f"Unknown command type: {command_type}",
+        player=player,
+        endpoint="/quick-command"
+    )
     return jsonify({"success": False, "error": f"Unknown command type: {command_type}"})
 
 @app.route("/kit/<kit_id>", methods=["POST"])
@@ -635,6 +795,17 @@ def give_kit(kit_id):
             result = run_command(cmd)
             print(f"Result: {result}")
             results.append(result)
+            
+            # Log errors from kit commands
+            from rcon_client import is_rcon_error
+            if is_rcon_error(result):
+                log_error(
+                    command_type=f"kit_{kit_id}",
+                    command=cmd,
+                    error_message=result,
+                    player=player,
+                    endpoint="/kit"
+                )
             if not str(result).startswith("Error"):
                 record_item_usage(item_data["item"], item_data["amount"])
         return jsonify({"success": True, "results": results})

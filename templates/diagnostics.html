@@ -21,6 +21,22 @@
 
             <div id="results" class="space-y-4"></div>
 
+            <!-- Error Logs Section -->
+            <div class="mt-8 bg-gray-900 rounded-lg p-6 border border-red-700/50">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
+                        Recent Error Logs
+                    </h2>
+                    <button onclick="loadErrorLogs()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-refresh"></i> Refresh
+                    </button>
+                </div>
+                <div id="errorLogs" class="space-y-2 max-h-96 overflow-y-auto">
+                    <p class="text-gray-400 text-sm">Click Refresh to load error logs...</p>
+                </div>
+            </div>
+
             <div class="mt-8 bg-gray-900 rounded-lg p-6 border border-gray-700">
                 <h2 class="text-xl font-bold text-white mb-4">
                     <i class="fas fa-question-circle text-yellow-400 mr-2"></i>
@@ -181,8 +197,50 @@
             }
         }
 
+        async function loadErrorLogs(limit = 50) {
+            const logsDiv = document.getElementById('errorLogs');
+            logsDiv.innerHTML = '<p class="text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Loading error logs...</p>';
+            
+            try {
+                const response = await fetch(`/api/error-logs?limit=${limit}`);
+                const data = await response.json();
+                
+                if (data.success && data.logs && data.logs.length > 0) {
+                    let html = '<div class="space-y-2">';
+                    data.logs.forEach(log => {
+                        const timestamp = new Date(log.timestamp).toLocaleString();
+                        html += `
+                            <div class="bg-gray-800 border-l-4 border-red-500 p-4 rounded-lg hover:bg-gray-750 transition">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex-1">
+                                        <span class="text-red-400 font-bold text-sm">${log.command_type}</span>
+                                        ${log.player ? `<span class="text-gray-400 text-xs ml-2">• Player: <span class="text-blue-300">${log.player}</span></span>` : ''}
+                                        <span class="text-gray-500 text-xs ml-2">• ${log.endpoint}</span>
+                                    </div>
+                                    <span class="text-gray-500 text-xs">${timestamp}</span>
+                                </div>
+                                <div class="text-orange-300 text-sm mb-2 font-mono bg-black/30 p-2 rounded">
+                                    ${log.error_message}
+                                </div>
+                                ${log.command !== 'N/A' ? `<div class="text-gray-400 text-xs font-mono">${log.command}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    logsDiv.innerHTML = html;
+                } else {
+                    logsDiv.innerHTML = '<p class="text-green-400 text-sm"><i class="fas fa-check-circle mr-2"></i>No errors recorded - everything is working smoothly!</p>';
+                }
+            } catch (error) {
+                logsDiv.innerHTML = `<p class="text-red-400 text-sm"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load error logs: ${error.message}</p>`;
+            }
+        }
+
         // Auto-test on page load
-        window.addEventListener('load', testConnection);
+        window.addEventListener('load', () => {
+            testConnection();
+            loadErrorLogs();
+        });
     </script>
 </body>
 </html>

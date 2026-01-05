@@ -35,8 +35,7 @@
       {"id": "night", "label": "Night", "icon": "moon", "color": "indigo", "description": "Set time to night"},
       {"id": "clear_weather", "label": "Clear", "icon": "cloud-sun", "color": "sky", "description": "Clear weather"},
       {"id": "rain", "label": "Rain", "icon": "cloud-rain", "color": "blue", "description": "Set weather to rain"},
-      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"},
-      {"id": "clear_ground_items", "label": "Clear", "icon": "broom", "color": "red", "description": "Clear all dropped items"}
+      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"}
     ]
   },
   {
@@ -99,25 +98,24 @@
     "category_icon": "house-user",
     "border_color": "emerald",
     "text_color": "emerald",
-    "grid_cols": 2,
+    "grid_cols": 4,
     "commands": [
+      {"id": "spawn_villager_farmer", "label": "Farmer", "icon": "seedling", "color": "green", "description": "Spawn a farmer villager"},
       {"id": "spawn_villager_librarian", "label": "Librarian", "icon": "book", "color": "indigo", "description": "Spawn a librarian villager"},
-      {"id": "spawn_iron_golem", "label": "Iron Golem", "icon": "robot", "color": "slate", "description": "Spawn an iron golem"}
-    ]
-  },
-  {
-    "name": "Game Rules",
-    "category_icon": "gavel",
-    "border_color": "violet",
-    "text_color": "violet",
-    "grid_cols": 2,
-    "commands": [
-      {"id": "keep_inventory_on", "label": "Keep Inv ON", "icon": "box-archive", "color": "green", "description": "Enable keep inventory on death"},
-      {"id": "keep_inventory_off", "label": "Keep Inv OFF", "icon": "box-open", "color": "red", "description": "Disable keep inventory on death"},
-      {"id": "mob_griefing_off", "label": "No Grief", "icon": "shield", "color": "teal", "description": "Disable mob griefing"},
-      {"id": "mob_griefing_on", "label": "Grief ON", "icon": "bomb", "color": "orange", "description": "Enable mob griefing"},
-      {"id": "daylight_cycle_off", "label": "Freeze Time", "icon": "pause", "color": "indigo", "description": "Stop daylight cycle"},
-      {"id": "daylight_cycle_on", "label": "Time Flow", "icon": "play", "color": "sky", "description": "Resume daylight cycle"}
+      {"id": "spawn_villager_cleric", "label": "Cleric", "icon": "cross", "color": "purple", "description": "Spawn a cleric villager"},
+      {"id": "spawn_villager_armorer", "label": "Armorer", "icon": "shield-halved", "color": "slate", "description": "Spawn an armorer villager"},
+      {"id": "spawn_villager_weaponsmith", "label": "Weaponsmith", "icon": "hammer", "color": "red", "description": "Spawn a weaponsmith villager"},
+      {"id": "spawn_villager_toolsmith", "label": "Toolsmith", "icon": "wrench", "color": "orange", "description": "Spawn a toolsmith villager"},
+      {"id": "spawn_villager_butcher", "label": "Butcher", "icon": "drumstick-bite", "color": "rose", "description": "Spawn a butcher villager"},
+      {"id": "spawn_villager_cartographer", "label": "Cartographer", "icon": "map", "color": "amber", "description": "Spawn a cartographer villager"},
+      {"id": "spawn_villager_fisherman", "label": "Fisherman", "icon": "fish", "color": "cyan", "description": "Spawn a fisherman villager"},
+      {"id": "spawn_villager_fletcher", "label": "Fletcher", "icon": "bow-arrow", "color": "yellow", "description": "Spawn a fletcher villager"},
+      {"id": "spawn_villager_shepherd", "label": "Shepherd", "icon": "cloud", "color": "lime", "description": "Spawn a shepherd villager"},
+      {"id": "spawn_villager_leatherworker", "label": "Leatherworker", "icon": "vest", "color": "brown", "description": "Spawn a leatherworker villager"},
+      {"id": "spawn_villager_mason", "label": "Mason", "icon": "brick", "color": "gray", "description": "Spawn a mason villager"},
+      {"id": "spawn_villager_nitwit", "label": "Nitwit", "icon": "face-smile", "color": "teal", "description": "Spawn a nitwit villager"},
+      {"id": "spawn_iron_golem", "label": "Iron Golem", "icon": "robot", "color": "slate", "description": "Spawn an iron golem"},
+      {"id": "spawn_cat", "label": "Cat", "icon": "cat", "color": "pink", "description": "Spawn a cat for the village"}
     ]
   },
   {
@@ -140,9 +138,9 @@
     "text_color": "fuchsia",
     "grid_cols": 2,
     "commands": [
-      {"id": "full_restore", "label": "Full Restore", "icon": "heart-pulse", "color": "pink", "description": "Heal, feed, and clear effects"},
+      {"id": "full_restore", "label": "Full Restore", "icon": "heart-pulse", "color": "pink", "description": "Instant health restoration"},
       {"id": "fly_mode", "label": "Fly Mode", "icon": "dove", "color": "blue", "description": "Toggle fly mode"},
-      {"id": "godmode_on", "label": "God Mode", "icon": "shield-halved", "color": "yellow", "description": "Enable god mode (invincibility)"},
+      {"id": "godmode_on", "label": "God Mode", "icon": "shield-halved", "color": "yellow", "description": "Enable resistance effect (damage reduction)"},
       {"id": "max_health", "label": "Max Health", "icon": "heart-circle-plus", "color": "red", "description": "Set maximum health"}
     ]
   },

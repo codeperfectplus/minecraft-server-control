@@ -205,6 +205,9 @@ with app.app_context():
 # Load kits
 KITS_CONFIG = load_json_config('kits.json')
 
+# Load quick commands
+QUICK_COMMANDS = load_json_config('quick_commands.json')
+
 @app.route("/")
 def dashboard():
     players = get_online_players()
@@ -215,6 +218,7 @@ def dashboard():
         village_types=VILLAGE_TYPES,
         locations=fetch_locations(),
         kits=KITS_CONFIG.get("kits", []),
+        quick_commands=QUICK_COMMANDS if isinstance(QUICK_COMMANDS, list) else [],
     )
 
 @app.route("/diagnostics")
@@ -504,49 +508,84 @@ def quick_command():
     print(f"Command Type: {command_type}")
     
     commands_map = {
+        # Gamemode
         "gamemode_survival": f"/gamemode survival {player}",
         "gamemode_creative": f"/gamemode creative {player}",
         "gamemode_adventure": f"/gamemode adventure {player}",
+        
+        # Player Actions
         "heal": f"/effect give {player} minecraft:instant_health 1 10",
         "feed": f"/effect give {player} minecraft:saturation 1 10",
         "clear_inventory": f"/clear {player}",
-        "day": "/time set day",
-        "night": "/time set night",
-        "clear_weather": "/weather clear",
-        "rain": "/weather rain",
-        "thunder": "/weather thunder",
         "give_xp": f"/xp add {player} 1000",
-        "fly_enable": f"/effect give {player} minecraft:levitation 1000000 255 true",
-        "fly_disable": f"/effect clear {player} minecraft:levitation",
+        
+        # Effects
         "speed": f"/effect give {player} minecraft:speed 600 2",
         "jump_boost": f"/effect give {player} minecraft:jump_boost 600 2",
         "night_vision": f"/effect give {player} minecraft:night_vision 600 0",
         "water_breathing": f"/effect give {player} minecraft:water_breathing 600 0",
         "fire_resistance": f"/effect give {player} minecraft:fire_resistance 600 0",
         "clear_effects": f"/effect clear {player}",
-        "full_health": f"/effect give {player} minecraft:regeneration 10 255",
-        "hero_of_village": f"/effect give {player} minecraft:hero_of_the_village 1200 0",
-        "xp_reset": f"/xp set {player} 0 points",
-        "op_player": f"/op {player}",
-        "deop_player": f"/deop {player}",
-        "whitelist_add": f"/whitelist add {player}",
-        "whitelist_remove": f"/whitelist remove {player}",
+        
+        # World Control
+        "day": "/time set day",
+        "night": "/time set night",
+        "clear_weather": "/weather clear",
+        "rain": "/weather rain",
+        "thunder": "/weather thunder",
+        
+        # Time Control
+        "time_dawn": "/time set 0",
+        "time_noon": "/time set 6000",
+        "time_dusk": "/time set 12000",
+        "time_midnight": "/time set 18000",
+        
+        # Difficulty
         "difficulty_peaceful": "/difficulty peaceful",
         "difficulty_normal": "/difficulty normal",
         "difficulty_hard": "/difficulty hard",
+        
+        # Game Rules
         "keep_inventory_on": "/gamerule keepInventory true",
         "keep_inventory_off": "/gamerule keepInventory false",
         "mob_griefing_off": "/gamerule mobGriefing false",
         "mob_griefing_on": "/gamerule mobGriefing true",
         "daylight_cycle_off": "/gamerule doDaylightCycle false",
         "daylight_cycle_on": "/gamerule doDaylightCycle true",
+        
+        # World Border
         "worldborder_small": "/worldborder set 500 30",
         "worldborder_medium": "/worldborder set 2000 60",
         "worldborder_large": "/worldborder set 5000 120",
         "worldborder_infinite": "/worldborder set 60000000 0",
+        
+        # Admin & Utility
+        "op_player": f"/op {player}",
+        "deop_player": f"/deop {player}",
+        "whitelist_add": f"/whitelist add {player}",
+        "whitelist_remove": f"/whitelist remove {player}",
+        "xp_reset": f"/xp set {player} 0 points",
+        "hero_of_village": f"/effect give {player} minecraft:hero_of_the_village 1200 0",
+        
+        # Village Helpers
         "spawn_villager_librarian": "/summon villager ~ ~ ~ {VillagerData:{profession:\"minecraft:librarian\",type:\"minecraft:plains\",level:5}}",
         "spawn_iron_golem": "/summon iron_golem ~ ~ ~",
+        
+        # Mob Control
+        "kill_hostile_mobs": "/kill @e[type=!player,type=!item,type=!villager,type=!iron_golem,type=!horse,type=!cat,type=!wolf,type=!parrot,type=!donkey,type=!mule,type=!llama,type=!trader_llama]",
+        "kill_passive_mobs": "/kill @e[type=cow] /kill @e[type=sheep] /kill @e[type=pig] /kill @e[type=chicken]",
+        "kill_all_entities": "/kill @e[type=!player]",
+        "kill_item_entities": "/kill @e[type=item]",
         "clear_ground_items": "/kill @e[type=item]",
+        
+        # Advanced Player
+        "full_restore": f"/effect give {player} minecraft:instant_health 1 10 /effect give {player} minecraft:saturation 1 10 /effect clear {player}",
+        "fly_mode": f"/effect give {player} minecraft:levitation 1000000 255 true",
+        "fly_enable": f"/effect give {player} minecraft:levitation 1000000 255 true",
+        "fly_disable": f"/effect clear {player} minecraft:levitation",
+        "godmode_on": f"/effect give {player} minecraft:resistance 1000000 255 true /effect give {player} minecraft:fire_resistance 1000000 0 true /effect give {player} minecraft:water_breathing 1000000 0 true",
+        "max_health": f"/attribute {player} minecraft:generic.max_health base set 1024",
+        "full_health": f"/effect give {player} minecraft:regeneration 10 255",
     }
     
     cmd = commands_map.get(command_type)

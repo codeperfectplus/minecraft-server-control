@@ -54,6 +54,47 @@
     </div>
 </div>
 
+<!-- Quick Commands Section - Redesigned -->
+<div id="commands" class="glass rounded-xl shadow-2xl p-6 lg:p-8 border border-indigo-500/50 section-shell">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold text-white flex items-center">
+            <i class="fas fa-bolt text-indigo-400 mr-3"></i>
+            Quick Commands
+        </h2>
+        <select id="quickCommandPlayer" class="px-4 py-2 bg-gray-800 text-white rounded-lg border border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            {% if players|length == 0 %}
+            <option value="">No players online</option>
+            {% elif players|length == 1 %}
+            <option value="{{ players[0] }}" selected>{{ players[0] }}</option>
+            {% else %}
+            <option value="">Select Player</option>
+            {% for player in players %}
+            <option value="{{ player }}">{{ player }}</option>
+            {% endfor %}
+            {% endif %}
+        </select>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {% for category in quick_commands %}
+        <div class="glass rounded-lg p-5 border border-{{ category.border_color }}-500/30">
+            <h3 class="text-lg font-semibold text-{{ category.text_color }}-300 mb-3 flex items-center">
+                <i class="fas fa-{{ category.category_icon }} mr-2"></i> {{ category.name }}
+            </h3>
+            <div class="grid grid-cols-{{ category.grid_cols }} gap-2">
+                {% for cmd in category.commands %}
+                <button type="button" onclick="quickCommand('{{ cmd.id }}')" 
+                        class="bg-gradient-to-br from-{{ cmd.color }}-600 to-{{ cmd.color }}-700 hover:from-{{ cmd.color }}-500 hover:to-{{ cmd.color }}-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition shadow-lg hover:shadow-xl{% if category.grid_cols == 1 %} flex items-center justify-center{% endif %}"
+                        title="{{ cmd.description|default('') }}">
+                    <i class="fas fa-{{ cmd.icon }} mr-2"></i>{{ cmd.label }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
 <!-- Quick Access Sidebar -->
 <div id="quickAccessNav" class="hidden lg:block fixed left-4 top-36 glass rounded-xl section-shell p-3 w-48 space-y-2 text-sm z-20" style="max-height: calc(100vh - 10rem); overflow-y: auto;">
     <div class="text-teal-100 font-semibold text-xs flex items-center gap-2 mb-2">
@@ -101,6 +142,7 @@
                         </label>
                         <select name="player" required class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-green-500 focus:border-green-400 focus:ring-2 focus:ring-green-400 focus:outline-none">
                             {% if players|length == 0 %}
+
                             <option value="">No players online</option>
                             {% elif players|length == 1 %}
                             <option value="{{ players[0] }}" selected>{{ players[0] }} (Auto-selected)</option>
@@ -184,164 +226,6 @@
                         <div class="text-sm">{{ kit.name }}</div>
                     </button>
                     {% endfor %}
-                </div>
-            </form>
-        </div>
-
-        <!-- Quick Commands Section -->
-        <div id="commands" class="glass rounded-xl shadow-2xl p-6 border border-indigo-500/50 section-shell">
-            <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
-                <i class="fas fa-bolt text-indigo-400 mr-3"></i>
-                Quick Commands
-            </h2>
-            
-            <form id="quickCommandForm">
-                <div class="mb-4">
-                    <label class="block text-indigo-300 font-semibold mb-2">
-                        <i class="fas fa-user"></i> Player
-                    </label>
-                    <select name="player" required class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-indigo-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                        {% if players|length == 0 %}
-                        <option value="">No players online</option>
-                        {% elif players|length == 1 %}
-                        <option value="{{ players[0] }}" selected>{{ players[0] }} (Auto-selected)</option>
-                        {% else %}
-                        <option value="">Select Player</option>
-                        {% for player in players %}
-                        <option value="{{ player }}">{{ player }}</option>
-                        {% endfor %}
-                        {% endif %}
-                    </select>
-                </div>
-
-                <div class="space-y-3">
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Player Actions</h3>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="quickCommand('heal')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-heart mr-1"></i> Heal
-                            </button>
-                            <button type="button" onclick="quickCommand('feed')" class="bg-gray-800 hover:bg-orange-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-drumstick-bite mr-1"></i> Feed
-                            </button>
-                            <button type="button" onclick="quickCommand('give_xp')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-star mr-1"></i> +1000 XP
-                            </button>
-                            <button type="button" onclick="quickCommand('clear_inventory')" class="bg-gray-800 hover:bg-red-700 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-trash mr-1"></i> Clear Inv
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Effects</h3>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="quickCommand('speed')" class="bg-gray-800 hover:bg-cyan-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-wind mr-1"></i> Speed
-                            </button>
-                            <button type="button" onclick="quickCommand('jump_boost')" class="bg-gray-800 hover:bg-teal-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-up-long mr-1"></i> Jump
-                            </button>
-                            <button type="button" onclick="quickCommand('night_vision')" class="bg-gray-800 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-eye mr-1"></i> Night Vision
-                            </button>
-                            <button type="button" onclick="quickCommand('fire_resistance')" class="bg-gray-800 hover:bg-orange-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-fire mr-1"></i> Fire Resist
-                            </button>
-                            <button type="button" onclick="quickCommand('water_breathing')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-water mr-1"></i> Water Breath
-                            </button>
-                            <button type="button" onclick="quickCommand('clear_effects')" class="bg-gray-800 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-times mr-1"></i> Clear Effects
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Gamemode</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="quickCommand('gamemode_survival')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-shield-heart mr-1"></i> Survival
-                            </button>
-                            <button type="button" onclick="quickCommand('gamemode_creative')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-wand-magic-sparkles mr-1"></i> Creative
-                            </button>
-                            <button type="button" onclick="quickCommand('gamemode_adventure')" class="bg-gray-800 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-map mr-1"></i> Adventure
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">World</h3>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="quickCommand('day')" class="bg-gray-800 hover:bg-yellow-500 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-sun mr-1"></i> Day
-                            </button>
-                            <button type="button" onclick="quickCommand('night')" class="bg-gray-800 hover:bg-indigo-700 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-moon mr-1"></i> Night
-                            </button>
-                            <button type="button" onclick="quickCommand('clear_weather')" class="bg-gray-800 hover:bg-blue-400 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-cloud-sun mr-1"></i> Clear
-                            </button>
-                            <button type="button" onclick="quickCommand('rain')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-cloud-rain mr-1"></i> Rain
-                            </button>
-                            <button type="button" onclick="quickCommand('thunder')" class="bg-gray-800 hover:bg-purple-700 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-bolt mr-1"></i> Thunder
-                            </button>
-                            <button type="button" onclick="quickCommand('clear_ground_items')" class="bg-gray-800 hover:bg-red-700 text-white px-3 py-2 rounded text-xs transition">
-                                <i class="fas fa-broom mr-1"></i> Clear Drops
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Difficulty</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="quickCommand('difficulty_peaceful')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">
-                                Peaceful
-                            </button>
-                            <button type="button" onclick="quickCommand('difficulty_normal')" class="bg-gray-800 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition">
-                                Normal
-                            </button>
-                            <button type="button" onclick="quickCommand('difficulty_hard')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">
-                                Hard
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Rules block removed per request -->
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">World Border</h3>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button type="button" onclick="quickCommand('worldborder_small')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">500</button>
-                            <button type="button" onclick="quickCommand('worldborder_medium')" class="bg-gray-800 hover:bg-yellow-600 text-white px-3 py-2 rounded text-xs transition">2k</button>
-                            <button type="button" onclick="quickCommand('worldborder_large')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">5k</button>
-                            <button type="button" onclick="quickCommand('worldborder_infinite')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">Infinite</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Admin & Utility</h3>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="quickCommand('op_player')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">OP</button>
-                            <button type="button" onclick="quickCommand('deop_player')" class="bg-gray-800 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs transition">De-OP</button>
-                            <button type="button" onclick="quickCommand('whitelist_add')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">Whitelist +</button>
-                            <button type="button" onclick="quickCommand('whitelist_remove')" class="bg-gray-800 hover:bg-red-600 text-white px-3 py-2 rounded text-xs transition">Whitelist -</button>
-                            <button type="button" onclick="quickCommand('xp_reset')" class="bg-gray-800 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs transition">Reset XP</button>
-                            <button type="button" onclick="quickCommand('hero_of_village')" class="bg-gray-800 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs transition">Hero Buff</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-2">Village Helpers</h3>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="quickCommand('spawn_villager_librarian')" class="bg-gray-800 hover:bg-indigo-600 text-white px-3 py-2 rounded text-xs transition">Summon Librarian</button>
-                            <button type="button" onclick="quickCommand('spawn_iron_golem')" class="bg-gray-800 hover:bg-green-600 text-white px-3 py-2 rounded text-xs transition">Summon Golem</button>
-                        </div>
-                    </div>
                 </div>
             </form>
         </div>
@@ -637,8 +521,8 @@
     // Quick Command Function
     async function quickCommand(commandType) {
         console.log('=== QUICK COMMAND FUNCTION ===');
-        const form = document.getElementById('quickCommandForm');
-        const player = form.player.value;
+        const playerSelect = document.getElementById('quickCommandPlayer');
+        const player = playerSelect ? playerSelect.value : document.querySelector('#quickCommandForm select[name=\"player\"]')?.value;
         console.log('Player:', player);
         console.log('Command Type:', commandType);
         

@@ -1,6 +1,3 @@
-PRESETS = {
-    "base": "-912 63 -769",
-}
 
 VILLAGE_TYPES = [
     "plains",

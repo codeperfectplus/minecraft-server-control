@@ -1,0 +1,171 @@
+[
+  {
+    "name": "Player Actions",
+    "category_icon": "user-ninja",
+    "border_color": "red",
+    "text_color": "red",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "heal", "label": "Heal", "icon": "heart", "color": "red", "description": "Restore player health to maximum"},
+      {"id": "feed", "label": "Feed", "icon": "drumstick-bite", "color": "orange", "description": "Restore player hunger to maximum"},
+      {"id": "give_xp", "label": "+1000 XP", "icon": "star", "color": "yellow", "description": "Give 1000 experience points"},
+      {"id": "clear_inventory", "label": "Clear Inv", "icon": "trash", "color": "red", "description": "Clear player inventory"}
+    ]
+  },
+  {
+    "name": "Gamemode",
+    "category_icon": "gamepad",
+    "border_color": "purple",
+    "text_color": "purple",
+    "grid_cols": 1,
+    "commands": [
+      {"id": "gamemode_survival", "label": "Survival", "icon": "shield-heart", "color": "emerald", "description": "Set gamemode to Survival"},
+      {"id": "gamemode_creative", "label": "Creative", "icon": "wand-magic-sparkles", "color": "blue", "description": "Set gamemode to Creative"},
+      {"id": "gamemode_adventure", "label": "Adventure", "icon": "map", "color": "purple", "description": "Set gamemode to Adventure"}
+    ]
+  },
+  {
+    "name": "World Control",
+    "category_icon": "globe",
+    "border_color": "blue",
+    "text_color": "blue",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "day", "label": "Day", "icon": "sun", "color": "yellow", "description": "Set time to day"},
+      {"id": "night", "label": "Night", "icon": "moon", "color": "indigo", "description": "Set time to night"},
+      {"id": "clear_weather", "label": "Clear", "icon": "cloud-sun", "color": "sky", "description": "Clear weather"},
+      {"id": "rain", "label": "Rain", "icon": "cloud-rain", "color": "blue", "description": "Set weather to rain"}
+    ]
+  },
+  {
+    "name": "Player Effects",
+    "category_icon": "flask",
+    "border_color": "cyan",
+    "text_color": "cyan",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "speed", "label": "Speed", "icon": "wind", "color": "cyan", "description": "Apply speed effect"},
+      {"id": "jump_boost", "label": "Jump", "icon": "up-long", "color": "teal", "description": "Apply jump boost effect"},
+      {"id": "night_vision", "label": "Night Vis", "icon": "eye", "color": "yellow", "description": "Apply night vision effect"},
+      {"id": "fire_resistance", "label": "Fire Res", "icon": "fire", "color": "orange", "description": "Apply fire resistance effect"},
+      {"id": "water_breathing", "label": "Water Brth", "icon": "water", "color": "blue", "description": "Apply water breathing effect"},
+      {"id": "clear_effects", "label": "Clear", "icon": "times", "color": "gray", "description": "Clear all effects"}
+    ]
+  },
+  {
+    "name": "Difficulty",
+    "category_icon": "skull",
+    "border_color": "yellow",
+    "text_color": "yellow",
+    "grid_cols": 1,
+    "commands": [
+      {"id": "difficulty_peaceful", "label": "Peaceful", "icon": "dove", "color": "green", "description": "Set difficulty to Peaceful"},
+      {"id": "difficulty_normal", "label": "Normal", "icon": "balance-scale", "color": "yellow", "description": "Set difficulty to Normal"},
+      {"id": "difficulty_hard", "label": "Hard", "icon": "skull-crossbones", "color": "red", "description": "Set difficulty to Hard"}
+    ]
+  },
+  {
+    "name": "World Utility",
+    "category_icon": "tools",
+    "border_color": "green",
+    "text_color": "green",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"},
+      {"id": "clear_ground_items", "label": "Clear", "icon": "broom", "color": "red", "description": "Clear all dropped items"}
+    ]
+  },
+  {
+    "name": "World Border",
+    "category_icon": "border-all",
+    "border_color": "pink",
+    "text_color": "pink",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "worldborder_small", "label": "500", "icon": "compress", "color": "red", "description": "Set world border to 500 blocks"},
+      {"id": "worldborder_medium", "label": "2k", "icon": "arrows-alt", "color": "yellow", "description": "Set world border to 2000 blocks"},
+      {"id": "worldborder_large", "label": "5k", "icon": "expand", "color": "green", "description": "Set world border to 5000 blocks"},
+      {"id": "worldborder_infinite", "label": "Infinite", "icon": "infinity", "color": "blue", "description": "Remove world border"}
+    ]
+  },
+  {
+    "name": "Admin & Utility",
+    "category_icon": "user-shield",
+    "border_color": "amber",
+    "text_color": "amber",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "op_player", "label": "OP", "icon": "crown", "color": "red", "description": "Grant operator permissions"},
+      {"id": "deop_player", "label": "De-OP", "icon": "user-minus", "color": "gray", "description": "Remove operator permissions"},
+      {"id": "whitelist_add", "label": "Whitelist +", "icon": "user-plus", "color": "green", "description": "Add player to whitelist"},
+      {"id": "whitelist_remove", "label": "Whitelist -", "icon": "user-times", "color": "red", "description": "Remove player from whitelist"},
+      {"id": "xp_reset", "label": "Reset XP", "icon": "redo", "color": "blue", "description": "Reset player experience"},
+      {"id": "hero_of_village", "label": "Hero Buff", "icon": "medal", "color": "purple", "description": "Grant Hero of the Village effect"}
+    ]
+  },
+  {
+    "name": "Village Helpers",
+    "category_icon": "house-user",
+    "border_color": "emerald",
+    "text_color": "emerald",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "spawn_villager_librarian", "label": "Librarian", "icon": "book", "color": "indigo", "description": "Spawn a librarian villager"},
+      {"id": "spawn_iron_golem", "label": "Iron Golem", "icon": "robot", "color": "slate", "description": "Spawn an iron golem"}
+    ]
+  },
+  {
+    "name": "Game Rules",
+    "category_icon": "gavel",
+    "border_color": "violet",
+    "text_color": "violet",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "keep_inventory_on", "label": "Keep Inv ON", "icon": "box-archive", "color": "green", "description": "Enable keep inventory on death"},
+      {"id": "keep_inventory_off", "label": "Keep Inv OFF", "icon": "box-open", "color": "red", "description": "Disable keep inventory on death"},
+      {"id": "mob_griefing_off", "label": "No Grief", "icon": "shield", "color": "teal", "description": "Disable mob griefing"},
+      {"id": "mob_griefing_on", "label": "Grief ON", "icon": "bomb", "color": "orange", "description": "Enable mob griefing"},
+      {"id": "daylight_cycle_off", "label": "Freeze Time", "icon": "pause", "color": "indigo", "description": "Stop daylight cycle"},
+      {"id": "daylight_cycle_on", "label": "Time Flow", "icon": "play", "color": "sky", "description": "Resume daylight cycle"}
+    ]
+  },
+  {
+    "name": "Mob Control",
+    "category_icon": "skull-crossbones",
+    "border_color": "rose",
+    "text_color": "rose",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "kill_hostile_mobs", "label": "Kill Hostile", "icon": "dragon", "color": "red", "description": "Kill all hostile mobs"},
+      {"id": "kill_passive_mobs", "label": "Kill Passive", "icon": "cow", "color": "orange", "description": "Kill all passive mobs"},
+      {"id": "kill_all_entities", "label": "Kill All", "icon": "circle-xmark", "color": "purple", "description": "Kill all entities"},
+      {"id": "kill_item_entities", "label": "Clear Items", "icon": "cube", "color": "gray", "description": "Remove all item entities"}
+    ]
+  },
+  {
+    "name": "Advanced Player",
+    "category_icon": "user-astronaut",
+    "border_color": "fuchsia",
+    "text_color": "fuchsia",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "full_restore", "label": "Full Restore", "icon": "heart-pulse", "color": "pink", "description": "Heal, feed, and clear effects"},
+      {"id": "fly_mode", "label": "Fly Mode", "icon": "dove", "color": "blue", "description": "Toggle fly mode"},
+      {"id": "godmode_on", "label": "God Mode", "icon": "shield-halved", "color": "yellow", "description": "Enable god mode (invincibility)"},
+      {"id": "max_health", "label": "Max Health", "icon": "heart-circle-plus", "color": "red", "description": "Set maximum health"}
+    ]
+  },
+  {
+    "name": "Time Control",
+    "category_icon": "clock",
+    "border_color": "amber",
+    "text_color": "amber",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "time_dawn", "label": "Dawn", "icon": "cloud-sun", "color": "orange", "description": "Set time to dawn (6:00 AM)"},
+      {"id": "time_noon", "label": "Noon", "icon": "sun", "color": "yellow", "description": "Set time to noon (12:00 PM)"},
+      {"id": "time_dusk", "label": "Dusk", "icon": "cloud-moon", "color": "purple", "description": "Set time to dusk (6:00 PM)"},
+      {"id": "time_midnight", "label": "Midnight", "icon": "moon", "color": "indigo", "description": "Set time to midnight (12:00 AM)"}
+    ]
+  }
+]

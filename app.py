@@ -593,10 +593,27 @@ def quick_command():
         print(f"Executing command: {cmd}")
         result = run_command(cmd)
         print(f"RCON result: {result}")
-        return jsonify({"success": True, "result": result})
+        
+        # Parse the RCON response to determine success
+        from rcon_client import is_rcon_error
+        
+        # Check for RCON errors
+        if is_rcon_error(result):
+            print(f"Command failed: {result}")
+            return jsonify({
+                "success": False, 
+                "error": result,
+                "command": cmd
+            })
+        
+        return jsonify({
+            "success": True, 
+            "result": result,
+            "message": result if result else "Command executed successfully"
+        })
     
     print(f"ERROR: Unknown command type: {command_type}")
-    return jsonify({"success": False, "error": "Unknown command"})
+    return jsonify({"success": False, "error": f"Unknown command type: {command_type}"})
 
 @app.route("/kit/<kit_id>", methods=["POST"])
 def give_kit(kit_id):

@@ -555,9 +555,13 @@
             const data = await response.json();
             console.log('Response:', data);
             if (data.success) {
-                showNotification(`Command executed: ${commandType.replace('_', ' ')}`);
+                // Show detailed success message from RCON if available
+                const message = data.message || data.result || `Command executed: ${commandType.replace(/_/g, ' ')}`;
+                showNotification(message, 'success');
             } else {
-                showNotification('Failed to execute command', 'error');
+                // Show detailed error message from RCON
+                const errorMsg = data.error || 'Failed to execute command';
+                showNotification(errorMsg, 'error');
             }
         } catch (error) {
             console.error('Quick command error:', error);

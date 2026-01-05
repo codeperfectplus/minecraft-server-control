@@ -34,7 +34,9 @@
       {"id": "day", "label": "Day", "icon": "sun", "color": "yellow", "description": "Set time to day"},
       {"id": "night", "label": "Night", "icon": "moon", "color": "indigo", "description": "Set time to night"},
       {"id": "clear_weather", "label": "Clear", "icon": "cloud-sun", "color": "sky", "description": "Clear weather"},
-      {"id": "rain", "label": "Rain", "icon": "cloud-rain", "color": "blue", "description": "Set weather to rain"}
+      {"id": "rain", "label": "Rain", "icon": "cloud-rain", "color": "blue", "description": "Set weather to rain"},
+      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"},
+      {"id": "clear_ground_items", "label": "Clear", "icon": "broom", "color": "red", "description": "Clear all dropped items"}
     ]
   },
   {
@@ -62,17 +64,6 @@
       {"id": "difficulty_peaceful", "label": "Peaceful", "icon": "dove", "color": "green", "description": "Set difficulty to Peaceful"},
       {"id": "difficulty_normal", "label": "Normal", "icon": "balance-scale", "color": "yellow", "description": "Set difficulty to Normal"},
       {"id": "difficulty_hard", "label": "Hard", "icon": "skull-crossbones", "color": "red", "description": "Set difficulty to Hard"}
-    ]
-  },
-  {
-    "name": "World Utility",
-    "category_icon": "tools",
-    "border_color": "green",
-    "text_color": "green",
-    "grid_cols": 2,
-    "commands": [
-      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"},
-      {"id": "clear_ground_items", "label": "Clear", "icon": "broom", "color": "red", "description": "Clear all dropped items"}
     ]
   },
   {

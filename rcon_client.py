@@ -67,6 +67,39 @@ def run_command(command):
         except Exception:
             return f"Error: {error_msg}"
 
+def is_rcon_error(response):
+    """Check if RCON response indicates an error."""
+    if not response:
+        return False
+    error_indicators = [
+        "Error:",
+        "Unknown command",
+        "No player was found",
+        "Unable to modify",
+        "Invalid",
+        "Incorrect argument",
+        "Expected",
+        "Cannot",
+        "Failed",
+    ]
+    return any(indicator in response for indicator in error_indicators)
+
+
+def parse_rcon_response(response):
+    """Parse RCON response and return structured result.
+    
+    Returns:
+        dict with 'success', 'message', and 'data' keys
+    """
+    if not response or response.strip() == "":
+        return {"success": True, "message": "Command executed", "data": None}
+    
+    if is_rcon_error(response):
+        return {"success": False, "message": response, "data": None}
+    
+    return {"success": True, "message": response, "data": response}
+
+
 def get_online_players():
     """Get list of online players"""
     try:

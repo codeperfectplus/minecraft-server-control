@@ -6,180 +6,352 @@
     <title>{% block title %}Minecraft Server Control{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            --card: rgba(10, 18, 22, 0.84);
-            --border: rgba(94, 234, 212, 0.32);
-            --text: #e4f3f0;
-            --bg-spot-1: rgba(94, 234, 212, 0.16);
-            --bg-spot-2: rgba(59, 130, 246, 0.14);
-            --bg-stripe-1: #041019;
-            --bg-stripe-2: #060d14;
-            --grain: rgba(255,255,255,0.02);
-            --primary: #5eead4;
-            --primary-hover: #2dd4bf;
-            --secondary: #10b981;
+            --mc-grass: #7cbd3a;
+            --mc-dirt: #8b6333;
+            --mc-stone: #7f7f7f;
+            --mc-wood: #9c6f3d;
+            --mc-diamond: #5decf5;
+            --mc-redstone: #ff0000;
+            --mc-gold: #fcee4b;
+            --mc-emerald: #17dd62;
+            --mc-dark: #1a1a1a;
+            --mc-darker: #0d0d0d;
         }
-        [data-theme="plain"] {
-            --bg-spot-1: rgba(46, 204, 113, 0.18);
-            --bg-spot-2: rgba(52, 152, 219, 0.16);
-            --bg-stripe-1: #06141c;
-            --bg-stripe-2: #071923;
-            --primary: #5eead4;
-            --primary-hover: #2dd4bf;
-            --secondary: #10b981;
-            --border: rgba(94, 234, 212, 0.35);
+
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
         }
-        [data-theme="desert"] {
-            --bg-spot-1: rgba(234, 179, 8, 0.22);
-            --bg-spot-2: rgba(217, 119, 6, 0.18);
-            --bg-stripe-1: #20130c;
-            --bg-stripe-2: #2a1b0f;
-            --primary: #fbbf24;
-            --primary-hover: #f59e0b;
-            --secondary: #f97316;
-            --border: rgba(251, 191, 36, 0.35);
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
         }
-        [data-theme="savanna"] {
-            --bg-spot-1: rgba(180, 83, 9, 0.18);
-            --bg-spot-2: rgba(134, 65, 8, 0.16);
-            --bg-stripe-1: #1c1209;
-            --bg-stripe-2: #25170b;
-            --primary: #d97706;
-            --primary-hover: #b45309;
-            --secondary: #92400e;
-            --border: rgba(217, 119, 6, 0.32);
+
+        body {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
-        [data-theme="taiga"] {
-            --bg-spot-1: rgba(34, 197, 94, 0.16);
-            --bg-spot-2: rgba(59, 130, 246, 0.14);
-            --bg-stripe-1: #0c1714;
-            --bg-stripe-2: #0a1210;
-            --primary: #22c55e;
-            --primary-hover: #16a34a;
-            --secondary: #3b82f6;
-            --border: rgba(34, 197, 94, 0.32);
+
+        /* Animated background with stars */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent),
+                radial-gradient(1px 1px at 80% 10%, white, transparent),
+                radial-gradient(2px 2px at 90% 60%, white, transparent),
+                radial-gradient(1px 1px at 33% 80%, white, transparent);
+            background-size: 200% 200%;
+            animation: twinkle 8s ease-in-out infinite;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 0;
         }
-        [data-theme="snowy"] {
-            --bg-spot-1: rgba(180, 205, 255, 0.22);
-            --bg-spot-2: rgba(124, 166, 255, 0.18);
-            --bg-stripe-1: #0b1221;
-            --bg-stripe-2: #0d1426;
-            --primary: #9ac5ff;
-            --primary-hover: #7bb0ff;
-            --secondary: #dbeafe;
-            --border: rgba(154, 197, 255, 0.35);
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
         }
-        * { font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; }
-        html { font-size: 16px; }
-        @media (min-width: 1920px) { html { font-size: 17px; } }
-        @media (min-width: 2560px) { html { font-size: 18px; } }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        /* Minecraft-style card */
+        .mc-card {
+            background: linear-gradient(145deg, rgba(42, 42, 42, 0.95), rgba(28, 28, 28, 0.95));
+            border: 4px solid #3a3a3a;
+            box-shadow: 
+                inset 0 2px 0 rgba(255,255,255,0.1),
+                0 8px 24px rgba(0,0,0,0.4),
+                0 0 0 1px rgba(255,255,255,0.05);
+            position: relative;
+            backdrop-filter: blur(10px);
         }
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
+
+        .mc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         }
-        .page-stack > * + * { margin-top: 1.75rem; }
-        @media (min-width: 1536px) { .page-stack > * + * { margin-top: 2.25rem; } }
-        .glass {
-            background: var(--card);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+
+        /* Button styles */
+        .mc-button {
+            position: relative;
+            border: 3px solid rgba(0,0,0,0.4);
+            box-shadow: 
+                inset 0 2px 0 rgba(255,255,255,0.3),
+                0 4px 0 rgba(0,0,0,0.3);
+            transform: translateY(0);
+            transition: all 0.1s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
-        .section-shell { border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 16px 40px rgba(0,0,0,0.28); }
-        .soft-scroll::-webkit-scrollbar { height: 6px; }
-        .soft-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.35); border-radius: 999px; }
+
+        .mc-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                inset 0 2px 0 rgba(255,255,255,0.4),
+                0 6px 0 rgba(0,0,0,0.3);
+        }
+
+        .mc-button:active {
+            transform: translateY(1px);
+            box-shadow: 
+                inset 0 2px 0 rgba(255,255,255,0.2),
+                0 2px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Navbar with depth */
+        .mc-navbar {
+            background: linear-gradient(180deg, rgba(52, 52, 52, 0.98) 0%, rgba(32, 32, 32, 0.98) 100%);
+            border-bottom: 4px solid var(--mc-grass);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Notification */
+        .mc-notification {
+            animation: slideInFromTop 0.3s ease-out, fadeOut 0.3s ease-out 2.7s;
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-left: 2px solid #3a3a3a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4a4a4a, #3a3a3a);
+            border: 2px solid #2a2a2a;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #5a5a5a, #4a4a4a);
+        }
+
+        /* Grid pattern overlay */
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Glow effects */
+        .glow-diamond { box-shadow: 0 0 20px rgba(93, 236, 245, 0.3); }
+        .glow-emerald { box-shadow: 0 0 20px rgba(23, 221, 98, 0.3); }
+        .glow-gold { box-shadow: 0 0 20px rgba(252, 238, 75, 0.3); }
+        .glow-redstone { box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
+
+        /* Theme dropdown */
+        .theme-menu {
+            background: linear-gradient(145deg, rgba(42, 42, 42, 0.98), rgba(28, 28, 28, 0.98));
+            border: 3px solid #3a3a3a;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-option {
+            transition: all 0.2s ease;
+        }
+
+        .theme-option:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(4px);
+        }
+
+        /* Block-style icons */
+        .block-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
+            border: 3px solid #3a3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                inset 0 2px 0 rgba(255,255,255,0.2),
+                0 4px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Player count badge */
+        .player-badge {
+            background: linear-gradient(135deg, rgba(23, 221, 98, 0.2), rgba(23, 221, 98, 0.1));
+            border: 3px solid var(--mc-emerald);
+            padding: 0.5rem 1rem;
+            box-shadow: 
+                inset 0 2px 0 rgba(255,255,255,0.2),
+                0 0 20px rgba(23, 221, 98, 0.2);
+        }
     </style>
 </head>
-<body class="min-h-screen" data-theme="plain" style="background:
-    radial-gradient(140% 100% at 20% 20%, var(--bg-spot-1), transparent),
-    radial-gradient(140% 120% at 80% 0%, var(--bg-spot-2), transparent),
-    linear-gradient(135deg, var(--bg-stripe-1), var(--bg-stripe-2)),
-    repeating-linear-gradient(90deg, transparent 0, transparent 28px, rgba(255,255,255,0.018) 28px, rgba(255,255,255,0.018) 32px),
-    #050b10;">
-    <nav class="glass border-b border-green-500/40 shadow-xl sticky top-0 z-40">
-        <div class="container mx-auto px-6 lg:px-12 xl:px-16 2xl:px-24 py-5">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-cube text-green-400 text-2xl md:text-3xl"></i>
-                    <h1 class="text-xl md:text-2xl font-bold text-white">Minecraft Server Control</h1>
-                </div>
+<body class="relative">
+    <!-- Enhanced Navbar -->
+    <nav class="mc-navbar sticky top-0 z-50">
+        <div class="container mx-auto px-4 lg:px-8 py-4">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <!-- Logo Section -->
                 <div class="flex items-center gap-4">
-                    <a href="/" class="text-white hover:text-green-400 transition px-2 py-1 text-sm">
-                        <i class="fas fa-home"></i><span class="hidden sm:inline ml-2">Dashboard</span>
+                    <div class="flex items-center gap-3">
+                        <div class="block-icon">
+                            <i class="fas fa-cube text-2xl text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Minecraft Server</h1>
+                            <p class="text-xs text-gray-400">Admin Control Panel</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <a href="/" class="mc-button bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                        <i class="fas fa-home"></i>
+                        <span class="hidden sm:inline">Dashboard</span>
                     </a>
-                    <a href="/player" class="text-white hover:text-green-400 transition px-2 py-1 text-sm">
-                        <i class="fas fa-user"></i><span class="hidden sm:inline ml-2">Players</span>
+                    <a href="/player" class="mc-button bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                        <i class="fas fa-user"></i>
+                        <span class="hidden sm:inline">Players</span>
                     </a>
-                    <a href="/error-logs" class="text-white hover:text-red-400 transition px-2 py-1 text-sm">
-                        <i class="fas fa-exclamation-triangle"></i><span class="hidden sm:inline ml-2">Error Logs</span>
+                    <a href="/error-logs" class="mc-button bg-gradient-to-b from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="hidden sm:inline">Logs</span>
                     </a>
-                    <a href="/diagnostics" class="text-white hover:text-green-400 transition px-2 py-1 text-sm">
-                        <i class="fas fa-wrench"></i><span class="hidden sm:inline ml-2">Diagnostics</span>
+                    <a href="/diagnostics" class="mc-button bg-gradient-to-b from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                        <i class="fas fa-wrench"></i>
+                        <span class="hidden sm:inline">Diagnostics</span>
                     </a>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 md:gap-3">
+
+                <!-- Stats & Actions -->
+                <div class="flex items-center gap-3">
+                    <!-- Theme Selector -->
                     <div class="relative">
-                        <button onclick="document.getElementById('themeMenu').classList.toggle('hidden')" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition flex items-center gap-2 text-sm">
-                            <i class="fas fa-palette"></i> <span id="currentTheme" class="hidden sm:inline">Plain</span>
+                        <button onclick="toggleThemeMenu()" class="mc-button bg-gradient-to-b from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 flex items-center gap-2">
+                            <i class="fas fa-palette"></i>
+                            <span class="hidden lg:inline text-sm">Theme</span>
                         </button>
-                        <div id="themeMenu" class="hidden absolute right-0 mt-2 w-44 glass rounded-lg shadow-xl border border-white/20 p-2 z-50">
-                            <button onclick="setTheme('plain')" class="w-full text-left px-3 py-2 rounded text-teal-100 hover:bg-white/10 transition flex items-center gap-2">
-                                <i class="fas fa-leaf"></i> Plain
+                        <div id="themeMenu" class="hidden absolute right-0 mt-2 w-48 theme-menu p-2 z-50">
+                            <button onclick="setTheme('grass')" class="theme-option w-full text-left px-3 py-2 text-emerald-300 hover:text-emerald-100 flex items-center gap-2">
+                                <i class="fas fa-seedling"></i> Grass Plains
                             </button>
-                            <button onclick="setTheme('desert')" class="w-full text-left px-3 py-2 rounded text-yellow-200 hover:bg-white/10 transition flex items-center gap-2">
+                            <button onclick="setTheme('desert')" class="theme-option w-full text-left px-3 py-2 text-yellow-300 hover:text-yellow-100 flex items-center gap-2">
                                 <i class="fas fa-sun"></i> Desert
                             </button>
-                            <button onclick="setTheme('savanna')" class="w-full text-left px-3 py-2 rounded text-orange-200 hover:bg-white/10 transition flex items-center gap-2">
-                                <i class="fas fa-tree"></i> Savanna
+                            <button onclick="setTheme('ocean')" class="theme-option w-full text-left px-3 py-2 text-blue-300 hover:text-blue-100 flex items-center gap-2">
+                                <i class="fas fa-water"></i> Ocean
                             </button>
-                            <button onclick="setTheme('taiga')" class="w-full text-left px-3 py-2 rounded text-green-200 hover:bg-white/10 transition flex items-center gap-2">
-                                <i class="fas fa-snowflake"></i> Taiga
+                            <button onclick="setTheme('nether')" class="theme-option w-full text-left px-3 py-2 text-red-300 hover:text-red-100 flex items-center gap-2">
+                                <i class="fas fa-fire"></i> Nether
                             </button>
-                            <button onclick="setTheme('snowy')" class="w-full text-left px-3 py-2 rounded text-blue-200 hover:bg-white/10 transition flex items-center gap-2">
-                                <i class="fas fa-icicles"></i> Snowy
+                            <button onclick="setTheme('end')" class="theme-option w-full text-left px-3 py-2 text-purple-300 hover:text-purple-100 flex items-center gap-2">
+                                <i class="fas fa-moon"></i> The End
                             </button>
                         </div>
                     </div>
-                    <span id="player-count" class="bg-green-500 text-white px-3 py-2 rounded-full text-xs md:text-sm font-semibold flex items-center gap-1">
-                        <i class="fas fa-users"></i> <span id="count">0</span><span class="hidden sm:inline ml-1">Players</span>
-                    </span>
-                    <button onclick="refreshPlayers()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition text-sm">
-                        <i class="fas fa-sync-alt"></i><span class="hidden sm:inline ml-2">Refresh</span>
+
+                    <!-- Player Count -->
+                    <div class="player-badge flex items-center gap-2">
+                        <i class="fas fa-users text-emerald-400"></i>
+                        <span class="text-white font-bold" id="count">0</span>
+                        <span class="text-gray-300 text-xs hidden md:inline">Online</span>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <button onclick="refreshPlayers()" class="mc-button bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 glow-diamond">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto px-6 lg:px-12 xl:px-16 2xl:px-24 py-12 page-stack">
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 lg:px-8 py-8 relative z-10">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Footer -->
+    <footer class="relative z-10 mt-16 mb-8 text-center text-gray-500">
+        <div class="mc-card inline-block px-6 py-3">
+            <p class="text-sm">
+                <i class="fas fa-cube text-emerald-400 mr-2"></i>
+                Minecraft Server Control Panel
+                <i class="fas fa-heart text-red-400 mx-2"></i>
+                Powered by RCON
+            </p>
+        </div>
+    </footer>
+
     <script>
+        // Notification System
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.className = `fixed top-20 right-4 px-6 py-4 rounded-lg shadow-lg fade-in z-50 ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            } text-white`;
-            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            const colors = {
+                success: 'from-emerald-600 to-emerald-700',
+                error: 'from-red-600 to-red-700',
+                warning: 'from-yellow-600 to-yellow-700',
+                info: 'from-blue-600 to-blue-700'
+            };
+            
+            notification.className = `mc-notification fixed top-24 right-4 px-6 py-4 z-50 text-white font-semibold flex items-center gap-3 bg-gradient-to-b ${colors[type] || colors.success}`;
+            notification.style.border = '3px solid rgba(0,0,0,0.4)';
+            notification.style.boxShadow = 'inset 0 2px 0 rgba(255,255,255,0.3), 0 4px 0 rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4)';
+            
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            
+            notification.innerHTML = `
+                <i class="fas fa-${icons[type] || icons.success} text-xl"></i>
+                <span>${message}</span>
+            `;
+            
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
         }
 
+        // Refresh Players
         async function refreshPlayers() {
             try {
                 const response = await fetch('/api/players');
                 const data = await response.json();
                 
-                // Update player count
                 document.getElementById('count').textContent = data.count;
                 
-                // Update player dropdowns
                 const selects = document.querySelectorAll('select[name="player"]');
                 selects.forEach(select => {
                     const currentValue = select.value;
@@ -188,41 +360,54 @@
                     if (data.count === 0) {
                         select.innerHTML = '<option value="">No players online</option>';
                     } else if (data.count === 1) {
-                        // Auto-select single player
-                        select.innerHTML = `<option value="${data.players[0]}" selected>${data.players[0]} (Auto-selected)</option>`;
+                        select.innerHTML = `<option value="${data.players[0]}" selected>${data.players[0]}</option>`;
                     } else {
-                        // Multiple players - show dropdown
                         const defaultText = isRequired ? 'Select Player' : 'No specific player';
                         select.innerHTML = `<option value="">${defaultText}</option>` +
                             data.players.map(p => `<option value="${p}" ${p === currentValue ? 'selected' : ''}>${p}</option>`).join('');
                     }
                 });
                 
-                showNotification(`Updated: ${data.count} player(s) online`);
+                showNotification(`Updated: ${data.count} player(s) online`, 'success');
             } catch (error) {
                 showNotification('Failed to refresh players', 'error');
             }
         }
 
-        // Theme management
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('mcTheme', theme);
-            const themeNames = { plain: 'Plain', desert: 'Desert', savanna: 'Savanna', taiga: 'Taiga', snowy: 'Snowy' };
-            document.getElementById('currentTheme').textContent = themeNames[theme] || 'Plain';
-            document.getElementById('themeMenu').classList.add('hidden');
+        // Theme Management
+        function toggleThemeMenu() {
+            const menu = document.getElementById('themeMenu');
+            menu.classList.toggle('hidden');
         }
-        
+
+        function setTheme(theme) {
+            const themes = {
+                grass: { bg: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', border: '#7cbd3a' },
+                desert: { bg: 'linear-gradient(180deg, #2e1a0e 0%, #4a2c1a 50%, #664020 100%)', border: '#fcee4b' },
+                ocean: { bg: 'linear-gradient(180deg, #0a1929 0%, #0d2847 50%, #103d66 100%)', border: '#5decf5' },
+                nether: { bg: 'linear-gradient(180deg, #1a0a0a 0%, #2e0d0d 50%, #4a1010 100%)', border: '#ff0000' },
+                end: { bg: 'linear-gradient(180deg, #0d0a1a 0%, #1a0d2e 50%, #2e104a 100%)', border: '#a855f7' }
+            };
+            
+            if (themes[theme]) {
+                document.body.style.background = themes[theme].bg;
+                document.querySelectorAll('.mc-navbar').forEach(nav => {
+                    nav.style.borderBottomColor = themes[theme].border;
+                });
+                localStorage.setItem('mcTheme', theme);
+                document.getElementById('themeMenu').classList.add('hidden');
+                showNotification(`Theme changed to ${theme}`, 'info');
+            }
+        }
+
         // Load saved theme
-        const savedTheme = localStorage.getItem('mcTheme') || 'plain';
+        const savedTheme = localStorage.getItem('mcTheme') || 'grass';
         setTheme(savedTheme);
         
-        // Close theme menu when clicking outside
+        // Close menus when clicking outside
         document.addEventListener('click', (e) => {
-            const menu = document.getElementById('themeMenu');
-            const btn = e.target.closest('button');
-            if (menu && !menu.contains(e.target) && (!btn || !btn.onclick?.toString().includes('themeMenu'))) {
-                menu.classList.add('hidden');
+            if (!e.target.closest('#themeMenu') && !e.target.closest('button[onclick="toggleThemeMenu()"]')) {
+                document.getElementById('themeMenu')?.classList.add('hidden');
             }
         });
 

@@ -575,6 +575,15 @@ def teleport_coordinates():
     print(f"RCON result: {result}")
     return jsonify({"success": True, "result": result})
 
+
+@app.route("/api/usage/<item_name>", methods=["DELETE"])
+def delete_item_usage(item_name):
+    db = get_db()
+    db.execute("DELETE FROM item_usage WHERE item = ?", (item_name,))
+    db.commit()
+    return jsonify({"success": True})
+
+
 @app.route("/give", methods=["POST"])
 def give_item():
     print("\n=== GIVE ITEM REQUEST ===")

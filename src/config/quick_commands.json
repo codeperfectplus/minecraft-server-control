@@ -13,6 +13,58 @@
     ]
   },
   {
+    "name": "Time Control",
+    "category_icon": "clock",
+    "border_color": "amber",
+    "text_color": "amber",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "time_dawn", "label": "Dawn", "icon": "cloud-sun", "color": "orange", "description": "Set time to dawn (6:00 AM)"},
+      {"id": "time_noon", "label": "Noon", "icon": "sun", "color": "yellow", "description": "Set time to noon (12:00 PM)"},
+      {"id": "time_dusk", "label": "Dusk", "icon": "cloud-moon", "color": "purple", "description": "Set time to dusk (6:00 PM)"},
+      {"id": "time_midnight", "label": "Midnight", "icon": "moon", "color": "indigo", "description": "Set time to midnight (12:00 AM)"}
+    ]
+  },
+  {
+    "name": "Mob Control",
+    "category_icon": "skull-crossbones",
+    "border_color": "rose",
+    "text_color": "rose",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "kill_hostile_mobs", "label": "Kill Hostile", "icon": "dragon", "color": "red", "description": "Kill all hostile mobs"},
+      {"id": "kill_passive_mobs", "label": "Kill Passive", "icon": "cow", "color": "orange", "description": "Kill all passive mobs"},
+      {"id": "kill_all_entities", "label": "Kill All", "icon": "circle-xmark", "color": "purple", "description": "Kill all entities"},
+      {"id": "kill_item_entities", "label": "Clear Items", "icon": "cube", "color": "gray", "description": "Remove all item entities"}
+    ]
+  },
+  {
+    "name": "World Border",
+    "category_icon": "border-all",
+    "border_color": "pink",
+    "text_color": "pink",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "worldborder_small", "label": "500", "icon": "compress", "color": "red", "description": "Set world border to 500 blocks"},
+      {"id": "worldborder_medium", "label": "2k", "icon": "arrows-alt", "color": "yellow", "description": "Set world border to 2000 blocks"},
+      {"id": "worldborder_large", "label": "5k", "icon": "expand", "color": "green", "description": "Set world border to 5000 blocks"},
+      {"id": "worldborder_infinite", "label": "Infinite", "icon": "infinity", "color": "blue", "description": "Remove world border"}
+    ]
+  },
+  {
+    "name": "Advanced Player",
+    "category_icon": "user-astronaut",
+    "border_color": "fuchsia",
+    "text_color": "fuchsia",
+    "grid_cols": 2,
+    "commands": [
+      {"id": "full_restore", "label": "Full Restore", "icon": "heart-pulse", "color": "pink", "description": "Instant health restoration"},
+      {"id": "fly_mode", "label": "Fly Mode", "icon": "dove", "color": "blue", "description": "Toggle fly mode"},
+      {"id": "godmode_on", "label": "God Mode", "icon": "shield-halved", "color": "yellow", "description": "Enable resistance effect (damage reduction)"},
+      {"id": "max_health", "label": "Max Health", "icon": "heart-circle-plus", "color": "red", "description": "Set maximum health"}
+    ]
+  },
+  {
     "name": "Gamemode",
     "category_icon": "gamepad",
     "border_color": "purple",
@@ -22,6 +74,18 @@
       {"id": "gamemode_survival", "label": "Survival", "icon": "shield-heart", "color": "emerald", "description": "Set gamemode to Survival"},
       {"id": "gamemode_creative", "label": "Creative", "icon": "wand-magic-sparkles", "color": "blue", "description": "Set gamemode to Creative"},
       {"id": "gamemode_adventure", "label": "Adventure", "icon": "map", "color": "purple", "description": "Set gamemode to Adventure"}
+    ]
+  },
+  {
+    "name": "Difficulty",
+    "category_icon": "skull",
+    "border_color": "yellow",
+    "text_color": "yellow",
+    "grid_cols": 1,
+    "commands": [
+      {"id": "difficulty_peaceful", "label": "Peaceful", "icon": "dove", "color": "green", "description": "Set difficulty to Peaceful"},
+      {"id": "difficulty_normal", "label": "Normal", "icon": "balance-scale", "color": "yellow", "description": "Set difficulty to Normal"},
+      {"id": "difficulty_hard", "label": "Hard", "icon": "skull-crossbones", "color": "red", "description": "Set difficulty to Hard"}
     ]
   },
   {
@@ -35,7 +99,8 @@
       {"id": "night", "label": "Night", "icon": "moon", "color": "indigo", "description": "Set time to night"},
       {"id": "clear_weather", "label": "Clear", "icon": "cloud-sun", "color": "sky", "description": "Clear weather"},
       {"id": "rain", "label": "Rain", "icon": "cloud-rain", "color": "blue", "description": "Set weather to rain"},
-      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"}
+      {"id": "thunder", "label": "Thunder", "icon": "bolt", "color": "purple", "description": "Set weather to thunderstorm"},
+      {"id": "save_world", "label": "Save World", "icon": "save", "color": "emerald", "description": "Save the world"}
     ]
   },
   {
@@ -54,31 +119,6 @@
     ]
   },
   {
-    "name": "Difficulty",
-    "category_icon": "skull",
-    "border_color": "yellow",
-    "text_color": "yellow",
-    "grid_cols": 1,
-    "commands": [
-      {"id": "difficulty_peaceful", "label": "Peaceful", "icon": "dove", "color": "green", "description": "Set difficulty to Peaceful"},
-      {"id": "difficulty_normal", "label": "Normal", "icon": "balance-scale", "color": "yellow", "description": "Set difficulty to Normal"},
-      {"id": "difficulty_hard", "label": "Hard", "icon": "skull-crossbones", "color": "red", "description": "Set difficulty to Hard"}
-    ]
-  },
-  {
-    "name": "World Border",
-    "category_icon": "border-all",
-    "border_color": "pink",
-    "text_color": "pink",
-    "grid_cols": 2,
-    "commands": [
-      {"id": "worldborder_small", "label": "500", "icon": "compress", "color": "red", "description": "Set world border to 500 blocks"},
-      {"id": "worldborder_medium", "label": "2k", "icon": "arrows-alt", "color": "yellow", "description": "Set world border to 2000 blocks"},
-      {"id": "worldborder_large", "label": "5k", "icon": "expand", "color": "green", "description": "Set world border to 5000 blocks"},
-      {"id": "worldborder_infinite", "label": "Infinite", "icon": "infinity", "color": "blue", "description": "Remove world border"}
-    ]
-  },
-  {
     "name": "Admin & Utility",
     "category_icon": "user-shield",
     "border_color": "amber",
@@ -94,7 +134,7 @@
     ]
   },
   {
-    "name": "Village Helpers",
+    "name": "Village Workers",
     "category_icon": "house-user",
     "border_color": "emerald",
     "text_color": "emerald",
@@ -107,7 +147,16 @@
       {"id": "spawn_villager_weaponsmith", "label": "Weaponsmith", "icon": "hammer", "color": "red", "description": "Spawn a weaponsmith villager"},
       {"id": "spawn_villager_toolsmith", "label": "Toolsmith", "icon": "wrench", "color": "orange", "description": "Spawn a toolsmith villager"},
       {"id": "spawn_villager_butcher", "label": "Butcher", "icon": "drumstick-bite", "color": "rose", "description": "Spawn a butcher villager"},
-      {"id": "spawn_villager_cartographer", "label": "Cartographer", "icon": "map", "color": "amber", "description": "Spawn a cartographer villager"},
+      {"id": "spawn_villager_cartographer", "label": "Cartographer", "icon": "map", "color": "amber", "description": "Spawn a cartographer villager"}
+    ]
+  },
+  {
+    "name": "Village Community",
+    "category_icon": "users",
+    "border_color": "teal",
+    "text_color": "teal",
+    "grid_cols": 2,
+    "commands": [
       {"id": "spawn_villager_fisherman", "label": "Fisherman", "icon": "fish", "color": "cyan", "description": "Spawn a fisherman villager"},
       {"id": "spawn_villager_fletcher", "label": "Fletcher", "icon": "bow-arrow", "color": "yellow", "description": "Spawn a fletcher villager"},
       {"id": "spawn_villager_shepherd", "label": "Shepherd", "icon": "cloud", "color": "lime", "description": "Spawn a shepherd villager"},
@@ -116,45 +165,6 @@
       {"id": "spawn_villager_nitwit", "label": "Nitwit", "icon": "face-smile", "color": "teal", "description": "Spawn a nitwit villager"},
       {"id": "spawn_iron_golem", "label": "Iron Golem", "icon": "robot", "color": "slate", "description": "Spawn an iron golem"},
       {"id": "spawn_cat", "label": "Cat", "icon": "cat", "color": "pink", "description": "Spawn a cat for the village"}
-    ]
-  },
-  {
-    "name": "Mob Control",
-    "category_icon": "skull-crossbones",
-    "border_color": "rose",
-    "text_color": "rose",
-    "grid_cols": 2,
-    "commands": [
-      {"id": "kill_hostile_mobs", "label": "Kill Hostile", "icon": "dragon", "color": "red", "description": "Kill all hostile mobs"},
-      {"id": "kill_passive_mobs", "label": "Kill Passive", "icon": "cow", "color": "orange", "description": "Kill all passive mobs"},
-      {"id": "kill_all_entities", "label": "Kill All", "icon": "circle-xmark", "color": "purple", "description": "Kill all entities"},
-      {"id": "kill_item_entities", "label": "Clear Items", "icon": "cube", "color": "gray", "description": "Remove all item entities"}
-    ]
-  },
-  {
-    "name": "Advanced Player",
-    "category_icon": "user-astronaut",
-    "border_color": "fuchsia",
-    "text_color": "fuchsia",
-    "grid_cols": 2,
-    "commands": [
-      {"id": "full_restore", "label": "Full Restore", "icon": "heart-pulse", "color": "pink", "description": "Instant health restoration"},
-      {"id": "fly_mode", "label": "Fly Mode", "icon": "dove", "color": "blue", "description": "Toggle fly mode"},
-      {"id": "godmode_on", "label": "God Mode", "icon": "shield-halved", "color": "yellow", "description": "Enable resistance effect (damage reduction)"},
-      {"id": "max_health", "label": "Max Health", "icon": "heart-circle-plus", "color": "red", "description": "Set maximum health"}
-    ]
-  },
-  {
-    "name": "Time Control",
-    "category_icon": "clock",
-    "border_color": "amber",
-    "text_color": "amber",
-    "grid_cols": 2,
-    "commands": [
-      {"id": "time_dawn", "label": "Dawn", "icon": "cloud-sun", "color": "orange", "description": "Set time to dawn (6:00 AM)"},
-      {"id": "time_noon", "label": "Noon", "icon": "sun", "color": "yellow", "description": "Set time to noon (12:00 PM)"},
-      {"id": "time_dusk", "label": "Dusk", "icon": "cloud-moon", "color": "purple", "description": "Set time to dusk (6:00 PM)"},
-      {"id": "time_midnight", "label": "Midnight", "icon": "moon", "color": "indigo", "description": "Set time to midnight (12:00 AM)"}
     ]
   }
 ]

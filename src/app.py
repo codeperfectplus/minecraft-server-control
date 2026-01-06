@@ -672,6 +672,7 @@ def quick_command():
         "clear_weather": "/weather clear",
         "rain": "/weather rain",
         "thunder": "/weather thunder",
+        "save_world": "/save-all",
         
         # Time Control
         "time_dawn": "/time set 0",

@@ -25,6 +25,20 @@ Self-hosted Flask dashboard to control a running Minecraft server over RCON. It 
 3) Open the dashboard at `http://localhost:5090`.
 4) Use `GET /api/test-connection` to confirm RCON connectivity.
 
+## Screenshots
+
+### Dashboard Main View
+![Dashboard Main](screenshots/dashboard-main.png)
+
+### Player Management
+![Player Management](screenshots/player-management.png)
+
+### Diagnostics View
+![Diagnostics View](screenshots/diagnostics-view.png)
+
+### Commands Interface
+![Commands Interface](screenshots/commands-interface.png)
+
 ## Notes
 - Ensure your Minecraft server has `enable-rcon=true` and the password matches `.env`.
 - If you run both containers on a custom Docker network, set `RCON_HOST` to the Minecraft container name instead of the bridge IP.

@@ -1,4 +1,3 @@
-
 VILLAGE_TYPES = [
     "plains",
     "desert",

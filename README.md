@@ -94,16 +94,12 @@ git clone https://github.com/yourusername/mineboard.git
 cd mineboard
 ```
 
-### Step 2: Configure Environment Variables
-Create a `.env` file in the root directory (optional for default admin credentials):
-```bash
-SECRET_KEY=your_secret_key_here
-# Optional: Set default credentials (can be changed later)
-# ADMIN_USERNAME=admin
-# ADMIN_PASSWORD=changeme
-```
+### Step 2: Choose Your Deployment Method
 
-### Step 3: Start Mineboard
+#### Option A: Quick Start with Docker (Recommended)
+
+**Prerequisites:** Docker and Docker Compose installed
+
 ```bash
 # Using Docker Compose
 docker compose up -d --build
@@ -112,13 +108,52 @@ docker compose up -d --build
 bash up.sh
 ```
 
-### Step 4: Access the Dashboard
+#### Option B: Production Deployment with Docker (systemd service)
+
+**Prerequisites:** Docker, Docker Compose, and root access
+
+```bash
+# Deploy as a systemd service
+sudo bash deploy.sh
+```
+
+This will:
+- Install Mineboard to `/opt/mineboard`
+- Create a systemd service that starts on boot
+- Set up proper permissions and configuration
+
+#### Option C: Native Deployment (Without Docker)
+
+**Prerequisites:** Python 3.8+, pip, and root access
+
+```bash
+# Deploy without Docker as a systemd service
+sudo bash deploy-native.sh
+```
+
+This will:
+- Create a dedicated `mineboard` user
+- Set up a Python virtual environment
+- Install all dependencies
+- Create a systemd service
+- Configure automatic startup on boot
+
+**Service Management (Options B & C):**
+```bash
+sudo systemctl start mineboard    # Start the service
+sudo systemctl stop mineboard     # Stop the service
+sudo systemctl restart mineboard  # Restart the service
+sudo systemctl status mineboard   # Check status
+sudo journalctl -u mineboard -f   # View logs
+```
+
+### Step 3: Access the Dashboard
 Open your browser and navigate to:
 ```
 http://localhost:5090
 ```
 
-### Step 5: Login & Configure Your Server
+### Step 4: Login & Configure Your Server
 1. **Login** with default credentials (if set) or create your first admin user
 2. **Go to Settings** page
 3. **Configure your RCON connection:**

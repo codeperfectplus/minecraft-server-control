@@ -4,8 +4,16 @@ import sqlite3
 from flask import g
 from werkzeug.security import generate_password_hash
 
+# Determine data directory based on working directory
+# If running from /opt/mineboard, use /opt/mineboard/data
+# Otherwise use /app/data for Docker compatibility
+if os.getcwd().startswith('/opt/mineboard'):
+    DEFAULT_DB_PATH = "/opt/mineboard/data/data.db"
+else:
+    DEFAULT_DB_PATH = "/app/data/data.db"
+
 # Allow overriding DB path via env so container volume mounts can control location
-DB_PATH = os.environ.get("DB_PATH", "/app/data/data.db")
+DB_PATH = os.environ.get("DB_PATH", DEFAULT_DB_PATH)
 
 
 def get_db():

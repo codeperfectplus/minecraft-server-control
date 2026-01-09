@@ -1,0 +1,28 @@
+[Unit]
+Description=Mineboard - Minecraft Server Control Panel (Native)
+Documentation=https://github.com/yourusername/mineboard
+After=network.target
+
+[Service]
+Type=simple
+User=mineboard
+Group=mineboard
+WorkingDirectory=/opt/mineboard
+EnvironmentFile=/opt/mineboard/.env
+Environment="PATH=/opt/mineboard/venv/bin"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/opt/mineboard/venv/bin/python app.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/mineboard/data
+
+[Install]
+WantedBy=multi-user.target

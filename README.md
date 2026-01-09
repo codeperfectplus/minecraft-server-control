@@ -108,21 +108,8 @@ docker compose up -d --build
 bash up.sh
 ```
 
-#### Option B: Production Deployment with Docker (systemd service)
 
-**Prerequisites:** Docker, Docker Compose, and root access
-
-```bash
-# Deploy as a systemd service
-sudo bash deploy.sh
-```
-
-This will:
-- Install Mineboard to `/opt/mineboard`
-- Create a systemd service that starts on boot
-- Set up proper permissions and configuration
-
-#### Option C: Native Deployment (Without Docker)
+#### Option B: Native Deployment (Without Docker)
 
 **Prerequisites:** Python 3.8+, pip, and root access
 

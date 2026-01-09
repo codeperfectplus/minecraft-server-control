@@ -49,3 +49,9 @@ services:
       - ${MINECRAFT_DATA_PATH}:/data
 
     restart: unless-stopped
+    networks:
+      - minecraft_network
+
+networks:
+  minecraft_network:
+    external: true

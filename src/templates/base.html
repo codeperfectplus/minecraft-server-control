@@ -237,19 +237,19 @@
 
                 <!-- Navigation Links -->
                 <div class="flex items-center gap-2 flex-wrap">
-                    <a href="/" class="mc-button bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                    <a href="{{ url_for('main.dashboard') }}" class="mc-button bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
                         <i class="fas fa-home"></i>
                         <span class="hidden sm:inline">Dashboard</span>
                     </a>
-                    <a href="/player" class="mc-button bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                    <a href="{{ url_for('main.player') }}" class="mc-button bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
                         <i class="fas fa-user"></i>
                         <span class="hidden sm:inline">Players</span>
                     </a>
-                    <a href="/error-logs" class="mc-button bg-gradient-to-b from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                    <a href="{{ url_for('main.error_logs_page') }}" class="mc-button bg-gradient-to-b from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
                         <i class="fas fa-exclamation-triangle"></i>
                         <span class="hidden sm:inline">Logs</span>
                     </a>
-                    <a href="/settings" class="mc-button bg-gradient-to-b from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
+                    <a href="{{ url_for('main.settings') }}" class="mc-button bg-gradient-to-b from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2">
                         <i class="fas fa-cog"></i>
                         <span class="hidden sm:inline">Settings</span>
                     </a>
@@ -369,7 +369,7 @@
         // Refresh Players
         async function refreshPlayers() {
             try {
-                const response = await fetch('/api/players');
+                const response = await fetch("{{ url_for('api.api_players') }}");
                 const data = await response.json();
                 
                 document.getElementById('count').textContent = data.count;

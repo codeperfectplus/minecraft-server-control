@@ -59,7 +59,7 @@
                     <a href="{{ url_for('auth.manage_users') }}" class="mc-button bg-gradient-to-b from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-4 py-3 text-sm font-semibold text-center">
                         <i class="fas fa-users mr-2"></i>Manage Users
                     </a>
-                    <a href="/error-logs" class="mc-button bg-gradient-to-b from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-3 text-sm font-semibold text-center">
+                    <a href="{{ url_for('main.error_logs_page') }}" class="mc-button bg-gradient-to-b from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-3 text-sm font-semibold text-center">
                         <i class="fas fa-exclamation-triangle mr-2"></i>Error Logs
                     </a>
                     <button onclick="clearCache()" class="mc-button bg-gradient-to-b from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-4 py-3 text-sm font-semibold">
@@ -143,7 +143,7 @@
         resultsDiv.innerHTML = '<div class="text-white flex items-center justify-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i> Testing connection...</div>';
 
         try {
-            const response = await fetch('/api/test-connection');
+            const response = await fetch("{{ url_for('api.test_connection') }}");
             const data = await response.json();
 
             let html = '<div class="space-y-3 animation-fade-in">';
@@ -215,7 +215,7 @@
         infoDiv.innerHTML = '<p class="text-gray-400 text-sm text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</p>';
         
         try {
-            const response = await fetch('/api/players');
+            const response = await fetch("{{ url_for('api.api_players') }}");
             const data = await response.json();
             
             let html = '<div class="space-y-2">';
@@ -245,7 +245,7 @@
         appInfoDiv.innerHTML = '<p class="text-gray-400 text-sm text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</p>';
         
         try {
-            const response = await fetch('/api/app-info');
+            const response = await fetch("{{ url_for('api.app_info') }}");
             const data = await response.json();
             
             let html = '<div class="space-y-3">';

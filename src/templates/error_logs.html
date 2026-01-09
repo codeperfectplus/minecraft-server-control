@@ -116,7 +116,7 @@
         logsContainer.innerHTML = '<p class="text-gray-400 text-center p-8"><i class="fas fa-spinner fa-spin mr-2"></i>Loading error logs...</p>';
         
         try {
-            const response = await fetch(`/api/error-logs?limit=${limit}`);
+            const response = await fetch(`{{ url_for('api.api_error_logs') }}?limit=${limit}`);
             const data = await response.json();
             
             if (data.success && data.logs) {
@@ -277,7 +277,7 @@
         }
         
         try {
-            const response = await fetch('/api/error-logs/clear', { method: 'POST' });
+            const response = await fetch("{{ url_for('api.api_clear_error_logs') }}", { method: 'POST' });
             const data = await response.json();
             
             if (data.success) {

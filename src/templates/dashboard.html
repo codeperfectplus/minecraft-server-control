@@ -843,7 +843,7 @@
         manageList.innerHTML = '';
         
         try {
-            const res = await fetch('/api/locations');
+            const res = await fetch("{{ url_for('api.api_locations') }}");
             const data = await res.json();
             const locations = data.locations || [];
 
@@ -911,7 +911,7 @@
 
     async function deleteLocation(id) {
         if (!confirm('Delete location ' + id + '?')) return;
-        await fetch(`/api/locations/${id}`, { method: 'DELETE' });
+        await fetch(`{{ url_for('api.api_locations') }}/${id}`, { method: 'DELETE' });
         if (editingLocationId === id) resetLocationForm();
         loadLocations();
         showNotification('Location deleted', 'success');
@@ -943,7 +943,7 @@
         };
 
         const method = form.mode.value === 'edit' ? 'PUT' : 'POST';
-        const url = form.mode.value === 'edit' ? `/api/locations/${editingLocationId}` : '/api/locations';
+        const url = form.mode.value === 'edit' ? `{{ url_for('api.api_locations') }}/${editingLocationId}` : "{{ url_for('api.api_locations') }}";
 
         try {
             const res = await fetch(url, { method, body: toFormData(payload) });
@@ -1014,7 +1014,7 @@
         formData.append('player', player);
 
         try {
-            const posRes = await fetch('/api/player-location', { method: 'POST', body: formData });
+            const posRes = await fetch("{{ url_for('api.api_player_location') }}", { method: 'POST', body: formData });
             const posData = await posRes.json();
             if (!posData.success) {
                 showNotification(posData.error || 'Failed to fetch position', 'error');
@@ -1032,7 +1032,7 @@
                 z: coords.z,
             };
 
-            const saveRes = await fetch('/api/locations', { method: 'POST', body: toFormData(payload) });
+            const saveRes = await fetch("{{ url_for('api.api_locations') }}", { method: 'POST', body: toFormData(payload) });
             const saveData = await saveRes.json();
             if (saveData.success) {
                 showNotification('✓ Location saved', 'success');
@@ -1051,7 +1051,7 @@
         if (!confirm('Remove this item from Most Used?')) return;
         
         try {
-            const res = await fetch(`/api/usage/${itemName}`, { method: 'DELETE' });
+            const res = await fetch("{{ url_for('api.api_delete_item_usage', item_name='PLACEHOLDER') }}".replace('PLACEHOLDER', itemName), { method: 'DELETE' });
             const data = await res.json();
             if (data.success) {
                 showNotification('✓ Item removed from Most Used', 'success');
@@ -1074,7 +1074,7 @@
         const textContainer = document.getElementById('serverStatusText');
         
         try {
-            const response = await fetch('/api/test-connection');
+            const response = await fetch("{{ url_for('api.test_connection') }}");
             const data = await response.json();
             
             if (data.connected) {

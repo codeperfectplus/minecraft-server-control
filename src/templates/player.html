@@ -159,7 +159,7 @@
             formData.append('player', playerName);
             
             // Get position
-            const posRes = await fetch('/api/player-location', { method: 'POST', body: formData });
+            const posRes = await fetch("{{ url_for('api.api_player_location') }}", { method: 'POST', body: formData });
             const posData = await posRes.json();
             if (posData.success) {
                 const coords = posData.coordinates;
@@ -167,7 +167,7 @@
             }
             
             // Get stats (health, food, XP)
-            const statsRes = await fetch('/api/player-stats', { method: 'POST', body: formData });
+            const statsRes = await fetch("{{ url_for('api.api_player_stats') }}", { method: 'POST', body: formData });
             const statsData = await statsRes.json();
             if (statsData.success) {
                 const stats = statsData.stats;
@@ -198,7 +198,7 @@
             }
 
             // Get inventory
-            const invRes = await fetch('/api/player-inventory', { method: 'POST', body: formData });
+            const invRes = await fetch("{{ url_for('api.api_player_inventory') }}", { method: 'POST', body: formData });
             const invData = await invRes.json();
             if (invData.success && invData.inventory.length > 0) {
                 const inventoryGrid = document.getElementById('inventoryGrid');
@@ -214,7 +214,7 @@
             }
             
             // Get history
-            const histRes = await fetch('/api/player-history', { method: 'POST', body: formData });
+            const histRes = await fetch("{{ url_for('api.api_player_history') }}", { method: 'POST', body: formData });
             const histData = await histRes.json();
             if (histData.success && histData.history.length > 0) {
                 const historyList = document.getElementById('historyList');
@@ -241,7 +241,7 @@
     // Load players into selector
     async function refreshPlayerSelector() {
         try {
-            const response = await fetch('/api/players');
+            const response = await fetch("{{ url_for('api.api_players') }}");
             const data = await response.json();
             
             const selector = document.getElementById('playerSelector');

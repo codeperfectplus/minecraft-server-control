@@ -2,10 +2,19 @@
 
 #############################################
 # Mineboard Native Deployment Script
-# Deploys Mineboard without Docker
+# Standalone installer - clones repo and deploys
 #############################################
 
 set -e
+
+# Configuration
+REPO_URL="https://github.com/codeperfectplus/mineboard.git"
+TEMP_DIR="/tmp/mineboard-installer-$$"
+INSTALL_DIR="/opt/mineboard"
+SERVICE_NAME="mineboard"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+APP_USER="mineboard"
+APP_PORT="${PORT:-5090}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,13 +22,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
-
-# Default installation directory
-INSTALL_DIR="/opt/mineboard"
-SERVICE_NAME="mineboard"
-SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-APP_USER="mineboard"
-APP_PORT="${PORT:-5090}"
 
 # Function to print colored messages
 print_info() {
@@ -38,12 +40,42 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Show usage
+show_usage() {
+    echo ""
+    echo "Mineboard Native Deployment Script"
+    echo "Usage: sudo bash deploy-native.sh [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --install     Install Mineboard"
+    echo "  --uninstall   Uninstall Mineboard"
+    echo "  --help        Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  sudo bash deploy-native.sh --install"
+    echo "  sudo bash deploy-native.sh --uninstall"
+    echo ""
+}
+
 # Check if running as root
 check_root() {
     if [ "$EUID" -ne 0 ]; then 
         print_error "This script must be run as root (use sudo)"
         exit 1
     fi
+}
+
+# Check if Git is installed
+check_git() {
+    print_info "Checking Git installation..."
+    if ! command -v git &> /dev/null; then
+        print_error "Git is not installed. Installing..."
+        apt-get update && apt-get install -y git || {
+            print_error "Failed to install git. Please install it manually."
+            exit 1
+        }
+    fi
+    print_success "Git is installed"
 }
 
 # Check if Python 3.8+ is installed
@@ -67,6 +99,23 @@ check_python() {
     print_success "Python environment is ready"
 }
 
+# Clone repository
+clone_repo() {
+    print_info "Cloning Mineboard repository..."
+    
+    if [ -d "$TEMP_DIR" ]; then
+        print_warning "Cleaning up old temporary directory..."
+        rm -rf "$TEMP_DIR"
+    fi
+    
+    git clone "$REPO_URL" "$TEMP_DIR" || {
+        print_error "Failed to clone repository"
+        exit 1
+    }
+    
+    print_success "Repository cloned successfully"
+}
+
 # Create application user
 create_user() {
     print_info "Creating application user: $APP_USER"
@@ -85,17 +134,10 @@ create_install_dir() {
     
     if [ -d "$INSTALL_DIR" ]; then
         print_warning "Directory $INSTALL_DIR already exists"
-        read -p "Do you want to remove it and reinstall? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            print_info "Stopping service if running..."
-            systemctl stop $SERVICE_NAME 2>/dev/null || true
-            print_info "Removing existing directory..."
-            rm -rf "$INSTALL_DIR"
-        else
-            print_info "Using existing directory"
-            return
-        fi
+        print_info "Stopping service if running..."
+        systemctl stop $SERVICE_NAME 2>/dev/null || true
+        print_info "Removing existing directory..."
+        rm -rf "$INSTALL_DIR"
     fi
     
     mkdir -p "$INSTALL_DIR"
@@ -107,8 +149,7 @@ create_install_dir() {
 copy_files() {
     print_info "Copying application files..."
     
-    # Get the directory where this script is located
-    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    cd "$TEMP_DIR"
     
     # Copy all files except .git, __pycache__, venv, etc.
     rsync -av --progress \
@@ -121,11 +162,11 @@ copy_files() {
         --exclude='minecraft-data' \
         --exclude='docker-compose.yml' \
         --exclude='Dockerfile' \
-        "$SCRIPT_DIR/" "$INSTALL_DIR/" || {
+        "$TEMP_DIR/" "$INSTALL_DIR/" || {
             # Fallback to cp if rsync is not available
             print_warning "rsync not found, using cp instead..."
-            cp -r "$SCRIPT_DIR/"* "$INSTALL_DIR/" 2>/dev/null || true
-            cp -r "$SCRIPT_DIR/".??* "$INSTALL_DIR/" 2>/dev/null || true
+            cp -r "$TEMP_DIR/"* "$INSTALL_DIR/" 2>/dev/null || true
+            find "$TEMP_DIR" -name ".*" ! -name "." ! -name ".." -exec cp -r {} "$INSTALL_DIR/" \; 2>/dev/null || true
         }
     
     print_success "Files copied successfully"
@@ -262,8 +303,17 @@ start_service() {
     fi
 }
 
+# Cleanup temp directory
+cleanup() {
+    if [ -d "$TEMP_DIR" ]; then
+        print_info "Cleaning up temporary files..."
+        rm -rf "$TEMP_DIR"
+        print_success "Cleanup complete"
+    fi
+}
+
 # Display final information
-show_info() {
+show_install_info() {
     echo ""
     echo "======================================"
     print_success "Mineboard Deployment Complete!"
@@ -275,27 +325,65 @@ show_info() {
     echo ""
     echo "Access Mineboard at: http://localhost:$APP_PORT"
     echo ""
-    echo "Useful Commands:"
+    echo "======================================"
+    echo "  Login Information"
+    echo "======================================"
+    echo ""
+    echo "On first visit, you'll be prompted to create an admin account."
+    echo ""
+    echo "If default credentials are set in .env file:"
+    echo "  Username: admin"
+    echo "  Password: admin"
+    echo ""
+    echo "⚠️  IMPORTANT: Change the default password after first login!"
+    echo ""
+    echo "======================================"
+    echo "  Service Management"
+    echo "======================================"
+    echo ""
     echo "  Start:   sudo systemctl start $SERVICE_NAME"
     echo "  Stop:    sudo systemctl stop $SERVICE_NAME"
     echo "  Restart: sudo systemctl restart $SERVICE_NAME"
     echo "  Status:  sudo systemctl status $SERVICE_NAME"
     echo "  Logs:    sudo journalctl -u $SERVICE_NAME -f"
     echo ""
-    echo "To uninstall:"
-    echo "  sudo systemctl stop $SERVICE_NAME"
-    echo "  sudo systemctl disable $SERVICE_NAME"
-    echo "  sudo rm $SERVICE_FILE"
-    echo "  sudo userdel $APP_USER"
-    echo "  sudo rm -rf $INSTALL_DIR"
-    echo "  sudo systemctl daemon-reload"
-    echo ""
-    print_info "Don't forget to configure your RCON settings in the web interface!"
+    print_info "Configure your RCON settings in the Settings page to connect to your Minecraft server!"
     echo ""
 }
 
-# Main deployment process
-main() {
+# Uninstall function
+uninstall() {
+    echo ""
+    echo "======================================"
+    echo "  Uninstalling Mineboard"
+    echo "======================================"
+    echo ""
+    
+    print_info "Stopping service..."
+    systemctl stop $SERVICE_NAME 2>/dev/null || true
+    
+    print_info "Disabling service..."
+    systemctl disable $SERVICE_NAME 2>/dev/null || true
+    
+    print_info "Removing service file..."
+    rm -f $SERVICE_FILE
+    
+    print_info "Removing application files..."
+    rm -rf $INSTALL_DIR
+    
+    print_info "Removing application user..."
+    userdel $APP_USER 2>/dev/null || true
+    
+    print_info "Reloading systemd..."
+    systemctl daemon-reload
+    
+    echo ""
+    print_success "Mineboard has been uninstalled successfully!"
+    echo ""
+}
+
+# Install function
+install() {
     echo ""
     echo "======================================"
     echo "  Mineboard Native Deployment"
@@ -304,7 +392,9 @@ main() {
     echo ""
     
     check_root
+    check_git
     check_python
+    clone_repo
     create_user
     create_install_dir
     copy_files
@@ -314,8 +404,30 @@ main() {
     set_permissions
     install_service
     start_service
-    show_info
+    cleanup
+    show_install_info
+}
+
+# Main script logic
+main() {
+    case "${1:-}" in
+        --install)
+            install
+            ;;
+        --uninstall)
+            check_root
+            uninstall
+            ;;
+        --help)
+            show_usage
+            ;;
+        *)
+            print_error "Invalid option: $1"
+            show_usage
+            exit 1
+            ;;
+    esac
 }
 
 # Run main function
-main
+main "$@"

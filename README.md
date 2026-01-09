@@ -80,7 +80,6 @@
 ## 📋 Prerequisites
 
 Before setting up Mineboard, ensure you have:
-- Docker and Docker Compose installed
 - A running Minecraft server with RCON enabled
 - RCON port accessible from where Mineboard is hosted
 
@@ -88,44 +87,57 @@ Before setting up Mineboard, ensure you have:
 
 ## 🚀 Installation & Setup
 
-### Step 1: Clone the Repository
+### ⭐ Recommended: One-Click Installation
+
+**Prerequisites:** Python 3.8+, wget, and root access
+
+Download and install Mineboard with a single command:
+
 ```bash
-git clone https://github.com/yourusername/mineboard.git
-cd mineboard
+# Download the installer
+wget https://raw.githubusercontent.com/codeperfectplus/mineboard/refs/heads/main/deploy-native.sh
+
+# Make it executable and run
+chmod +x deploy-native.sh
+sudo ./deploy-native.sh --install
 ```
 
-### Step 2: Choose Your Deployment Method
+This will automatically:
+- Clone the repository
+- Create a dedicated `mineboard` system user
+- Set up a Python virtual environment at `/opt/mineboard`
+- Install all dependencies
+- Configure systemd service for automatic startup
+- Start Mineboard on port 5090
+- default user: admin / password: admin (change on first login)
 
-#### Option A: Quick Start with Docker (Recommended)
+**Uninstall:**
+```bash
+sudo ./deploy-native.sh --uninstall
+```
+
+---
+
+### Alternative: Docker Deployment (Development)
 
 **Prerequisites:** Docker and Docker Compose installed
 
 ```bash
+# Clone the repository
+git clone https://github.com/codeperfectplus/mineboard.git
+cd mineboard
+
 # Using Docker Compose
 docker compose up -d --build
 
 # Or using the convenience script
 bash up.sh
 ```
+---
 
+### After Installation
 
-#### Option B: Native Deployment (Without Docker)
-
-**Prerequisites:** Python 3.8+, pip, and root access
-
-```bash
-# Deploy without Docker as a systemd service
-sudo bash deploy-native.sh
-```
-
-This will:
-- Create a dedicated `mineboard` user
-- Set up a Python virtual environment
-- Install all dependencies
-- Create a systemd service
-- Configure automatic startup on boot
-
-**Service Management (Options B & C):**
+**Service Management:**
 ```bash
 sudo systemctl start mineboard    # Start the service
 sudo systemctl stop mineboard     # Stop the service
@@ -134,13 +146,18 @@ sudo systemctl status mineboard   # Check status
 sudo journalctl -u mineboard -f   # View logs
 ```
 
-### Step 3: Access the Dashboard
+**Access the Dashboard:**
 Open your browser and navigate to:
 ```
 http://localhost:5090
 ```
 
-### Step 4: Login & Configure Your Server
+### Configure Your Server
+```
+http://localhost:5090
+```
+
+### Configure Your Server
 1. **Login** with default credentials (if set) or create your first admin user
 2. **Go to Settings** page
 3. **Configure your RCON connection:**

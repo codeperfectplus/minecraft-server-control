@@ -26,8 +26,8 @@ services:
 
       # JVM performance tuning
       JVM_OPTS: >
-        -Xms6G
-        -Xmx12G
+        -Xms2G
+        -Xmx4G
         -XX:+UseG1GC
         -XX:+ParallelRefProcEnabled
         -XX:MaxGCPauseMillis=150

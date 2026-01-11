@@ -1,6 +1,6 @@
 [Unit]
 Description=Mineboard - Minecraft Server Control Panel (Native)
-Documentation=https://github.com/yourusername/mineboard
+Documentation=https://github.com/codeperfectplus/mineboard
 After=network.target
 
 [Service]

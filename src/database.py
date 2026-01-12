@@ -152,6 +152,12 @@ def init_db():
         )
         """
     )
+
+    # Check for missing type column in messages (migration)
+    try:
+        db.execute("ALTER TABLE messages ADD COLUMN type TEXT DEFAULT 'text'")
+    except sqlite3.OperationalError:
+        pass
     
     # Create chat groups table
     db.execute(
@@ -196,6 +202,18 @@ def init_db():
     # Check for missing last_read_at in group_members (migration)
     try:
         db.execute("ALTER TABLE group_members ADD COLUMN last_read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    except sqlite3.OperationalError:
+        pass
+        
+    # Check for missing profile_image in users (migration)
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN profile_image TEXT")
+    except sqlite3.OperationalError:
+        pass
+        
+    # Check for missing image_url in chat_groups (migration)
+    try:
+        db.execute("ALTER TABLE chat_groups ADD COLUMN image_url TEXT")
     except sqlite3.OperationalError:
         pass
     

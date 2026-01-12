@@ -6,12 +6,11 @@
 <div class="h-[calc(100vh-12rem)] flex gap-4">
     <!-- Sidebar -->
     <div class="w-80 flex-shrink-0 flex flex-col gap-4">
-        <!-- Search/Discover -->
-        <div class="mc-card p-3">
-            <h3 class="text-gray-400 text-xs uppercase font-bold mb-2 px-2">Discover</h3>
-            <div id="usersList" class="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
-                <!-- Users injected here -->
-                <div class="text-center text-gray-500 text-sm py-2">Loading users...</div>
+        <!-- Direct Messages -->
+        <div class="mc-card p-3 flex-shrink-0 max-h-64 flex flex-col">
+            <h3 class="text-gray-400 text-xs uppercase font-bold mb-2 px-2">Direct Messages</h3>
+            <div id="dmsList" class="space-y-1 overflow-y-auto custom-scrollbar flex-1">
+                <div class="text-center text-gray-500 text-sm py-2">No active chats</div>
             </div>
         </div>
 
@@ -28,6 +27,39 @@
                 <!-- Groups injected here -->
             </div>
         </div>
+
+        <!-- Search/Discover -->
+        <div class="mc-card p-3 flex-shrink-0 max-h-48 flex flex-col">
+            <h3 class="text-gray-400 text-xs uppercase font-bold mb-2 px-2">Discover</h3>
+            <div id="usersList" class="space-y-1 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Users injected here -->
+                <div class="text-center text-gray-500 text-sm py-2">Loading users...</div>
+            </div>
+        </div>
+
+        <!-- User Profile Settings -->
+        <div class="mc-card p-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="relative group cursor-pointer"
+                    onclick="document.getElementById('profileImageInput').click()">
+                    <div
+                        class="w-8 h-8 rounded bg-emerald-700 flex items-center justify-center text-white font-bold text-xs overflow-hidden">
+                        {% if current_user.profile_image %}
+                        <img src="{{ current_user.profile_image }}" class="w-full h-full object-cover">
+                        {% else %}
+                        {{ current_user.username[0].upper() }}
+                        {% endif %}
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center rounded">
+                        <i class="fas fa-camera text-white text-[10px]"></i>
+                    </div>
+                </div>
+                <div class="text-sm font-bold text-white">{{ current_user.username }}</div>
+                <input type="file" id="profileImageInput" class="hidden" accept="image/*"
+                    onchange="uploadImage(this, 'profile')">
+            </div>
+        </div>
     </div>
 
     <!-- Main Chat Area -->
@@ -35,7 +67,7 @@
         <!-- Chat Header -->
         <div class="p-4 border-b border-gray-700/50 bg-black/20 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center text-white font-bold text-lg shadow-inner"
+                <div class="w-10 h-10 rounded bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center text-white font-bold text-lg shadow-inner overflow-hidden"
                     id="chatAvatar">
                     <i class="fas fa-comments"></i>
                 </div>
@@ -87,9 +119,17 @@
         </button>
 
         <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-3">
-            <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-sm font-bold text-white">
-                <i class="fas fa-users"></i>
+            <div class="relative group cursor-pointer" onclick="document.getElementById('groupImageInput').click()">
+                <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-sm font-bold text-white overflow-hidden"
+                    id="groupInfoAvatar">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center rounded">
+                    <i class="fas fa-camera text-white text-[8px]"></i>
+                </div>
             </div>
+            <input type="file" id="groupImageInput" class="hidden" accept="image/*"
+                onchange="uploadImage(this, 'group')">
             <span id="groupInfoName">Group Name</span>
         </h2>
 
@@ -101,7 +141,7 @@
             </div>
         </div>
 
-        <div>
+        <div class="mb-4">
             <h3 class="text-gray-400 text-xs uppercase font-bold mb-2">Add Member</h3>
             <div class="flex gap-2">
                 <select id="addMemberSelect"
@@ -113,6 +153,14 @@
                     Add
                 </button>
             </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-700">
+            <button onclick="leaveGroup()"
+                class="w-full text-red-500 hover:text-red-400 hover:bg-red-500/10 py-2 rounded font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-sign-out-alt"></i>
+                Leave Group
+            </button>
         </div>
     </div>
 </div>
@@ -157,40 +205,94 @@
     let currentUser = {{ current_user.id }};
     let refreshInterval = null;
 
+    // Color generation based on string hash
+    function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        // HSL generation for better contrast and aesthetics
+        // Hue: based on hash
+        // Saturation: 60-80% for vibrancy
+        // Lightness: 60-75% for readability on dark backgrounds
+        const h = Math.abs(hash) % 360;
+        const s = 70 + (Math.abs(hash) % 20);
+        const l = 65 + (Math.abs(hash) % 15);
+
+        return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        loadUsers();
+        loadDMs();
+        loadDiscoverUsers(); // Renamed from loadUsers
         loadGroups();
     });
 
-    async function loadUsers() {
+    async function loadDMs() {
         try {
-            const res = await fetch('/api/chat/users');
+            const res = await fetch('/api/chat/dms');
             const data = await res.json();
-            const list = document.getElementById('usersList');
+            const list = document.getElementById('dmsList');
 
-            if (data.users.length === 0) {
-                list.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">No other users found</div>';
+            if (data.dms.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">No active chats</div>';
                 return;
             }
 
-            list.innerHTML = data.users.map(u => `
-                <div onclick="selectChat(${u.id}, '${u.username}', '${u.gamer_tag || ''}', false)" 
-                     class="p-2 rounded hover:bg-white/5 cursor-pointer flex items-center gap-3 transition-colors group">
-                    <div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                        ${u.username[0].toUpperCase()}
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex justify-between items-center">
-                             <div class="text-gray-200 text-sm font-semibold truncate group-hover:text-white">${u.username}</div>
-                             ${u.unread > 0 ? `<div class="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">${u.unread}</div>` : ''}
-                        </div>
-                        ${u.gamer_tag ? `<div class="text-emerald-500 text-xs truncate">${u.gamer_tag}</div>` : ''}
-                    </div>
-                </div>
-            `).join('');
+            list.innerHTML = data.dms.map(u => renderUserItem(u)).join('');
         } catch (e) {
-            console.error('Failed to load users', e);
+            console.error('Failed to load DMs', e);
         }
+    }
+
+    async function loadDiscoverUsers() {
+        try {
+            const res = await fetch('/api/chat/users');
+            const data = await res.json();
+
+            // Fetch DMs to filter them out of discover (optional, but requested behavior)
+            const dmsRes = await fetch('/api/chat/dms');
+            const dmsData = await dmsRes.json();
+            const dmIds = new Set(dmsData.dms.map(u => u.id));
+
+            const list = document.getElementById('usersList');
+
+            // Filter out users already in DMs
+            const discoverUsers = data.users.filter(u => !dmIds.has(u.id));
+
+            if (discoverUsers.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-xs text-center py-2">No new users to discover</div>';
+                return;
+            }
+
+            list.innerHTML = discoverUsers.map(u => renderUserItem(u)).join('');
+        } catch (e) {
+            console.error('Failed to load discover users', e);
+        }
+    }
+
+    function renderUserItem(u) {
+        const avatarHtml = u.profile_image
+            ? `<img src="${u.profile_image}" class="w-8 h-8 rounded object-cover border border-gray-600">`
+            : `<div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300 group-hover:bg-emerald-600 group-hover:text-white transition-colors"
+                    style="color: ${stringToColor(u.username)}; background-color: rgba(255,255,255,0.1);">
+                   ${u.username[0].toUpperCase()}
+               </div>`;
+
+        return `
+            <div onclick="selectChat(${u.id}, '${u.username}', '${u.gamer_tag || ''}', false, '${u.profile_image || ''}')" 
+                 class="p-2 rounded hover:bg-white/5 cursor-pointer flex items-center gap-3 transition-colors group">
+                ${avatarHtml}
+                <div class="min-w-0 flex-1">
+                    <div class="flex justify-between items-center">
+                         <div class="text-gray-200 text-sm font-semibold truncate group-hover:text-white">${u.username}</div>
+                         ${u.unread > 0 ? `<div class="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">${u.unread}</div>` : ''}
+                    </div>
+                    ${u.gamer_tag ? `<div class="text-emerald-500 text-xs truncate">${u.gamer_tag}</div>` : ''}
+                </div>
+            </div>
+        `;
     }
 
     async function loadGroups() {
@@ -204,24 +306,29 @@
                 return;
             }
 
-            list.innerHTML = data.groups.map(g => `
-                <div onclick="selectChat(${g.id}, '${g.name}', '', true)" 
+            list.innerHTML = data.groups.map(g => {
+                const avatarHtml = g.image_url
+                    ? `<img src="${g.image_url}" class="w-8 h-8 rounded object-cover border border-gray-600">`
+                    : `<div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-white transition-colors bg-gradient-to-br from-blue-600 to-blue-800">
+                           <i class="fas fa-users"></i>
+                       </div>`;
+
+                return `
+                <div onclick="selectChat(${g.id}, '${g.name}', '', true, '${g.image_url || ''}')" 
                      class="p-2 rounded hover:bg-white/5 cursor-pointer flex items-center gap-3 transition-colors group">
-                     <div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <i class="fas fa-users"></i>
-                    </div>
+                     ${avatarHtml}
                     <div class="flex-1 flex justify-between items-center min-w-0">
                         <div class="text-gray-200 text-sm font-semibold truncate group-hover:text-white">${g.name}</div>
                         ${g.unread > 0 ? `<div class="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">${g.unread}</div>` : ''}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         } catch (e) {
             console.error('Failed to load groups', e);
         }
     }
 
-    function selectChat(id, name, subtitle, isGroup) {
+    function selectChat(id, name, subtitle, isGroup, imageUrl) {
         if (currentTargetId === id && isGroupChat === isGroup) return;
 
         currentTargetId = id;
@@ -230,24 +337,94 @@
         // UI Updates
         document.getElementById('chatTitle').textContent = name;
         document.getElementById('chatSubtitle').textContent = isGroup ? 'Group Chat' : (subtitle || 'Private Chat');
-        document.getElementById('chatAvatar').innerHTML = isGroup ? '<i class="fas fa-users"></i>' : name[0].toUpperCase();
-        document.getElementById('chatAvatar').className = `w-10 h-10 rounded flex items-center justify-center text-white font-bold text-lg shadow-inner ${isGroup ? 'bg-gradient-to-br from-blue-600 to-blue-800' : 'bg-gradient-to-br from-emerald-600 to-emerald-800'}`;
+
+        const avatarEl = document.getElementById('chatAvatar');
+        if (imageUrl && imageUrl !== 'null') {
+            avatarEl.innerHTML = `<img src="${imageUrl}" class="w-full h-full object-cover">`;
+            avatarEl.className = "w-10 h-10 rounded shadow-inner overflow-hidden"; // remove bg colors
+        } else {
+            avatarEl.innerHTML = isGroup ? '<i class="fas fa-users"></i>' : name[0].toUpperCase();
+            avatarEl.className = `w-10 h-10 rounded flex items-center justify-center text-white font-bold text-lg shadow-inner overflow-hidden ${isGroup ? 'bg-gradient-to-br from-blue-600 to-blue-800' : 'bg-gradient-to-br from-emerald-600 to-emerald-800'}`;
+        }
 
         document.getElementById('messageInput').disabled = false;
         document.getElementById('messageInput').focus();
         document.getElementById('sendButton').disabled = false;
 
+        // Toggle actions button for groups
+        const actions = document.getElementById('chatActions');
+        if (isGroup) {
+            actions.classList.remove('hidden');
+            actions.classList.add('flex');
+
+            // Update Group Info Modal Header immediately just in case
+            document.getElementById('groupInfoName').textContent = name;
+            const groupAvatar = document.getElementById('groupInfoAvatar');
+            if (imageUrl && imageUrl !== 'null') {
+                groupAvatar.innerHTML = `<img src="${imageUrl}" class="w-full h-full object-cover">`;
+            } else {
+                groupAvatar.innerHTML = '<i class="fas fa-users"></i>';
+            }
+
+        } else {
+            actions.classList.add('hidden');
+            actions.classList.remove('flex');
+        }
+
         // Load Messages
         loadMessages();
-        loadMessages();
-        loadUsers(); // Refresh lists to clear unread for this chat
+        loadDMs();
+        loadDiscoverUsers();
         loadGroups();
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(() => {
             loadMessages();
-            loadUsers();
+            loadDMs();
+            loadDiscoverUsers();
             loadGroups();
         }, 3000); // Poll every 3s
+    }
+
+    async function uploadImage(input, type) {
+        if (!input.files || !input.files[0]) return;
+
+        const formData = new FormData();
+        formData.append('image', input.files[0]);
+        formData.append('type', type);
+        if (type === 'group') {
+            if (!isGroupChat || !currentTargetId) return alert('Select a group first');
+            formData.append('id', currentTargetId);
+        }
+
+        try {
+            const res = await fetch('/api/chat/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                // Determine layout reset
+                if (type === 'profile') {
+                    location.reload(); // Simplest to update all user instances
+                } else {
+                    // Update group image instantly
+                    alert('Group image updated!');
+                    loadGroups();
+                    // Update active view if it's this group
+                    if (isGroupChat && currentTargetId) {
+                        // re-select to update header
+                        // or just reload simpler
+                        location.reload();
+                    }
+                }
+            } else {
+                alert(data.error || 'Upload failed');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Upload error');
+        }
     }
 
     async function loadMessages() {
@@ -269,25 +446,88 @@
                         <p>No messages yet. Say hello!</p>
                     </div>`;
             } else {
+                let lastDate = null;
                 area.innerHTML = data.messages.map(m => {
+                    const date = new Date(m.timestamp + 'Z');
+                    const dateStr = date.toLocaleDateString();
+                    let dateHeader = '';
+
+                    if (lastDate !== dateStr) {
+                        const today = new Date().toLocaleDateString();
+                        const yesterday = new Date(Date.now() - 86400000).toLocaleDateString();
+                        let label = dateStr;
+                        if (dateStr === today) label = 'Today';
+                        else if (dateStr === yesterday) label = 'Yesterday';
+
+                        dateHeader = `
+                            <div class="flex items-center justify-center my-4">
+                                <div class="bg-gray-800/50 text-gray-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                    ${label}
+                                </div>
+                            </div>
+                         `;
+                        lastDate = dateStr;
+                    }
+
+                    // System Message Handling
+                    if (m.type === 'system') {
+                        return `
+                            ${dateHeader}
+                            <div class="flex justify-center mb-4">
+                                <div class="text-xs text-gray-500 bg-gray-900/40 px-3 py-1 rounded-full flex items-center gap-2">
+                                     <i class="fas fa-info-circle text-gray-600"></i>
+                                     <span><span class="font-bold text-gray-400">${m.username}</span> ${m.content}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     const isMe = m.sender_id === currentUser;
+                    const userColor = stringToColor(m.username);
+
+                    // Simple Markdown & Mention Parser
+                    let formattedContent = escapeHtml(m.content);
+
+                    // 1. Links (existing)
+                    formattedContent = formattedContent.replace(
+                        /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig,
+                        '<a href="$1" target="_blank" class="underline hover:text-white transition-colors">$1</a>'
+                    );
+
+                    // 2. Bold (**text**)
+                    formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+                    // 3. Italic (*text*)
+                    formattedContent = formattedContent.replace(/\*(.*?)\*/g, '<i>$1</i>');
+
+                    // 4. Code (`text`)
+                    formattedContent = formattedContent.replace(/`([^`]+)`/g, '<code class="bg-black/30 px-1 rounded font-mono text-xs">$1</code>');
+
+                    // 5. Mentions (@username)
+                    formattedContent = formattedContent.replace(/@(\w+)/g, '<span class="text-emerald-400 font-bold bg-emerald-400/10 px-1 rounded">@$1</span>');
+
                     return `
+                        ${dateHeader}
                         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-4">
                             <div class="flex items-end gap-2 max-w-[80%] ${isMe ? 'flex-row-reverse' : 'flex-row'}">
                                 ${!isMe && isGroupChat ? `
-                                    <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white shrink-0" title="${m.username}">
+                                    <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold text-white shrink-0 border border-gray-600" 
+                                         style="color: ${userColor};" 
+                                         title="${m.username}">
                                         ${m.username[0].toUpperCase()}
                                     </div>
                                 ` : ''}
-                                <div class="${isMe ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-gray-100'} px-4 py-2 rounded-2xl ${isMe ? 'rounded-br-none' : 'rounded-bl-none'} shadow-md">
-                                    <div class="text-xs text-emerald-400 font-bold mb-1">
-                                        ${m.gamer_tag ? `${m.gamer_tag} <span class="text-gray-500 font-normal">(@${m.username})</span>` : m.username}
-                                    </div>
-                                    <div class="text-sm break-words">${escapeHtml(m.content)}</div>
+                                <div class="${isMe ? 'bg-emerald-600 text-white' : 'bg-[#2a2a2a] text-gray-100'} px-4 py-2 rounded-2xl ${isMe ? 'rounded-br-none' : 'rounded-bl-none'} shadow-md border ${isMe ? 'border-emerald-500' : 'border-gray-700/50'}">
+                                    ${!isMe ? `
+                                        <div class="text-xs font-bold mb-1" style="color: ${userColor}">
+                                            ${m.gamer_tag ? `${m.gamer_tag} <span class="opacity-70 font-normal">(@${m.username})</span>` : m.username}
+                                        </div>
+                                    ` : ''}
+                                    <div class="text-sm break-words leading-relaxed">${formattedContent}</div>
                                 </div>
                             </div>
                             <div class="text-[10px] text-gray-500 mt-1 px-2">
-                                ${new Date(m.timestamp + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                         </div>
                     `;
@@ -333,6 +573,123 @@
         }
     }
 
+    // --- Group Management Info Modal ---
+
+    async function showChatInfo() {
+        if (!isGroupChat) return;
+
+        const modal = document.getElementById('groupInfoModal');
+        const title = document.getElementById('groupInfoName');
+        const list = document.getElementById('groupMembersList');
+        const select = document.getElementById('addMemberSelect');
+
+        title.textContent = document.getElementById('chatTitle').textContent;
+        list.innerHTML = '<div class="text-gray-500 text-xs text-center">Loading members...</div>';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        try {
+            // Fetch Members
+            const res = await fetch(`/api/chat/groups/${currentTargetId}/members`);
+            const data = await res.json();
+
+            list.innerHTML = data.members.map(m => `
+                <div class="flex items-center gap-2 p-2 rounded bg-white/5">
+                    <div class="w-6 h-6 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-white shrink-0" 
+                         style="color: ${stringToColor(m.username)}">
+                         ${m.username[0].toUpperCase()}
+                    </div>
+                    <div class="text-sm text-gray-200">
+                        ${m.gamer_tag ? `<span class="text-emerald-400 font-bold">${m.gamer_tag}</span>` : ''} 
+                        (${m.username})
+                    </div>
+                </div>
+            `).join('');
+
+            // Populate "Add Member" dropdown with NON-members
+            // We fetch all users, then filter out existing members
+            const allUsersRes = await fetch('/api/chat/users');
+            const allUsersData = await allUsersRes.json();
+
+            const memberIds = new Set(data.members.map(m => m.id));
+            const distinctUsers = allUsersData.users.filter(u => !memberIds.has(u.id));
+
+            if (distinctUsers.length === 0) {
+                select.innerHTML = '<option value="">No users available to add</option>';
+                select.disabled = true;
+            } else {
+                select.disabled = false;
+                select.innerHTML = '<option value="">Select user...</option>' +
+                    distinctUsers.map(u => `<option value="${u.id}">${u.username} ${u.gamer_tag ? `(${u.gamer_tag})` : ''}</option>`).join('');
+            }
+
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = '<div class="text-red-400 text-xs">Failed to load info</div>';
+        }
+    }
+
+    function closeGroupInfo() {
+        const modal = document.getElementById('groupInfoModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function addMember() {
+        const select = document.getElementById('addMemberSelect');
+        const userId = select.value;
+        if (!userId) return;
+
+        try {
+            const res = await fetch('/api/chat/groups/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    group_id: currentTargetId,
+                    user_id: userId
+                })
+            });
+
+            if (res.ok) {
+                // Refresh member list
+                showChatInfo();
+                alert('Member added!');
+            } else {
+                const d = await res.json();
+                alert(d.error || 'Failed to add member');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error adding member');
+        }
+    }
+
+    async function leaveGroup() {
+        if (!isGroupChat || !currentTargetId) return;
+
+        if (!confirm('Are you sure you want to leave this group?')) return;
+
+        try {
+            const res = await fetch('/api/chat/groups/leave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    group_id: currentTargetId
+                })
+            });
+
+            if (res.ok) {
+                closeGroupInfo();
+                location.reload(); // Simplest way to reset state
+            } else {
+                alert('Failed to leave group');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error leaving group');
+        }
+    }
+
     async function openCreateGroupModal() {
         const modal = document.getElementById('createGroupModal');
         modal.classList.remove('hidden');
@@ -347,7 +704,7 @@
                 <label class="flex items-center gap-3 p-2 hover:bg-white/5 rounded cursor-pointer">
                     <input type="checkbox" value="${u.id}" class="rounded border-gray-600 bg-gray-700 text-emerald-600 focus:ring-emerald-500">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300">
+                        <div class="w-6 h-6 rounded bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300" style="color: ${stringToColor(u.username)}">
                             ${u.username[0].toUpperCase()}
                         </div>
                         <div class="text-gray-300 text-sm">${u.gamer_tag ? `${u.gamer_tag} (@${u.username})` : u.username}</div>
@@ -400,6 +757,7 @@
         div.textContent = text;
         return div.innerHTML;
     }
+
 </script>
 
 <style>

@@ -4,6 +4,8 @@ import sqlite3
 from flask import g
 from werkzeug.security import generate_password_hash
 
+from src.services.game_utils import generate_gamer_tag
+
 # Determine data directory based on working directory
 # If running from /opt/mineboard, use /opt/mineboard/data
 # Otherwise use /app/data for Docker compatibility
@@ -185,9 +187,10 @@ def init_db():
         admin_username = os.environ.get("ADMIN_USERNAME", "admin")
         admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
         print(f"Creating initial admin user: {admin_username}")
+        gamer_tag = generate_gamer_tag()
         db.execute(
             "INSERT INTO users (username, password_hash, role, first_name, last_name, gamer_tag) VALUES (?, ?, ?, ?, ?, ?)",
-            (admin_username, generate_password_hash(admin_password), 'admin', 'System', 'Admin', 'Operator')
+            (admin_username, generate_password_hash(admin_password), 'admin', 'System', 'Admin', gamer_tag)
         )
         
     # Check for missing last_read_at in group_members (migration)

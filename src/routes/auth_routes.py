@@ -5,6 +5,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.database import get_db
 from src.models import User
+from src.services.game_utils import generate_gamer_tag
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -119,11 +120,12 @@ def manage_users():
             gamer_tag = request.form.get('gamer_tag', '').strip()
             
             # Generate random gamer tag if empty
-            if not gamer_tag:
-                adjectives = ['Swift', 'Bold', 'Silent', 'Cosmic', 'Wild', 'Neon', 'Pixel', 'Blocky', 'Ender', 'Nether']
-                nouns = ['Steve', 'Alex', 'Creeper', 'Miner', 'Crafter', 'Knight', 'Dragon', 'Wolf', 'Ghast', 'Warden']
-                gamer_tag = f"{random.choice(adjectives)}{random.choice(nouns)}{random.randint(100, 999)}"
-            
+            # if not gamer_tag:
+            #     adjectives = ['Swift', 'Bold', 'Silent', 'Cosmic', 'Wild', 'Neon', 'Pixel', 'Blocky', 'Ender', 'Nether']
+            #     nouns = ['Steve', 'Alex', 'Creeper', 'Miner', 'Crafter', 'Knight', 'Dragon', 'Wolf', 'Ghast', 'Warden']
+            #     gamer_tag = f"{random.choice(adjectives)}{random.choice(nouns)}{random.randint(100, 999)}"
+            gamer_tag = generate_gamer_tag()
+
             try:
                 db.execute(
                     "INSERT INTO users (username, password_hash, role, first_name, last_name, gamer_tag) VALUES (?, ?, ?, ?, ?, ?)",

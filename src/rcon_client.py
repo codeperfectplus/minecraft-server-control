@@ -1,175 +1,182 @@
-from mcrcon import MCRcon, MCRconException
 import socket
-import signal
-import threading
+import struct
+import logging
 from typing import Optional
 from src.services.config_service import get_rcon_config
 
-import struct
-import select
+# Set up logging
+logger = logging.getLogger(__name__)
 
-# Per-user connection pool
-_client_pool = {}
-_pool_lock = threading.Lock()
+# RCON Protocol Constants
+SERVERDATA_AUTH = 3
+SERVERDATA_AUTH_RESPONSE = 2
+SERVERDATA_EXECCOMMAND = 2
+SERVERDATA_RESPONSE_VALUE = 0
 
 
-
-class SafeMCRcon(MCRcon):
-    """Thread-safe MCRcon that uses socket timeouts instead of signals."""
-    def __init__(self, host, password, port=25575, timeout=5):
+class RconClient:
+    """Thread-safe RCON client that doesn't use signals."""
+    
+    def __init__(self, host: str, password: str, port: int = 25575, timeout: int = 10):
         self.host = host
         self.password = password
         self.port = port
         self.timeout = timeout
-        self.sock = None
-        self.id = 0
-
-    def connect(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(self.timeout)
-        self.sock.connect((self.host, self.port))
-        self._send(3, self.password)
-
-    def _send(self, out_type, out_data):
-        if self.sock is None:
-            raise MCRconException("Connection not established")
-
-        # Reuse MCRcon's packing logic or similar, but MCRcon._send is internal and expects keeping socket open.
-        # MCRcon.send sends a packet. We need to implement the handshake.
-        # But MCRcon._send is what we need. However, we can't easily rely on MCRcon's internals 
-        # if they also use signals (they don't, only connect() does).
-        # Actually MCRcon._send is fine, but connect() in MCRcon calls signal.alarm.
-        # So we override connect() to avoid signal.alarm.
-        
-        # We need to replicate the login part of connect() without signals.
-        # MCRcon.connect() does:
-        # 1. socket connect
-        # 2. send login packet
-        # 3. receive response
-        
-        # Let's call MCRcon._send for the login packet.
-        # MCRcon._send(self, type, data)
-        
-        # Send login packet
-        super()._send(3, self.password)
-        
-        # Receive response
-        # MCRcon._read(self, length)
-        # We need to wait for data.
-        
-        # In MCRcon, _read reads the packet.
-        # Login response type is 2.
-        
-        # We can just call super()._read(data_length)?
-        # MCRcon._read reads N bytes.
-        
-        # Let's look at how MCRcon handles the response.
-        # It reads the size, then the rest.
-        
-        # We just need to ensure we read a packet and check it's auth response.
-        
-        # Read packet length (4 bytes)
-        in_data = self._read(4)
-        if len(in_data) < 4:
-             raise MCRconException("Login failed: Truncated packet")
-             
-        length = struct.unpack('<i', in_data)[0]
-        
-        # Read rest of packet
-        in_data = self._read(length)
-        if len(in_data) < length:
-            raise MCRconException("Login failed: Truncated packet body")
-            
-        # Parse packet
-        # request_id (4), type (4), body (null terminated), padding (null)
-        request_id = struct.unpack('<i', in_data[0:4])[0]
-        packet_type = struct.unpack('<i', in_data[4:8])[0]
-        
-        if request_id == -1:
-            raise MCRconException("Login failed: Invalid password")
-
-def _connect_new(user_id: Optional[int] = None):
-    """Create and connect a new RCON client for a specific user."""
-    cfg = get_rcon_config(user_id)
-    # Use SafeMCRcon instead of MCRcon
-    client = SafeMCRcon(cfg["host"], cfg["password"], port=cfg["port"], timeout=3)
-    try:
-        client.connect()
-        return client
-    except (socket.timeout, ConnectionRefusedError, OSError, MCRconException) as e:
-        # Fail fast - don't block the application
-        raise ConnectionError(f"Failed to connect to RCON server at {cfg['host']}:{cfg['port']}") from e
-
-
-def _get_client(user_id: Optional[int] = None):
-    """Return a connected RCON client for the user (thread-safe)."""
-    global _client_pool
-    cache_key = user_id if user_id is not None else "default"
+        self.socket = None
+        self.request_id = 0
     
-    with _pool_lock:
-        if cache_key not in _client_pool or _client_pool[cache_key] is None:
-            _client_pool[cache_key] = _connect_new(user_id)
-        return _client_pool[cache_key]
+    def connect(self):
+        """Establish connection and authenticate."""
+        try:
+            # Create socket with timeout
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(self.timeout)
+            self.socket.connect((self.host, self.port))
+            
+            # Authenticate
+            self._send_packet(SERVERDATA_AUTH, self.password)
+            response = self._receive_packet()
+            
+            if response[0] == -1:
+                raise Exception("Authentication failed - invalid password")
+            
+            logger.debug(f"Connected and authenticated to {self.host}:{self.port}")
+            
+        except socket.timeout:
+            raise Exception("Connection timeout")
+        except ConnectionRefusedError:
+            raise Exception("Connection refused")
+        except Exception as e:
+            if self.socket:
+                self.socket.close()
+            raise
+    
+    def command(self, cmd: str) -> str:
+        """Send a command and return the response."""
+        if not self.socket:
+            raise Exception("Not connected")
+        
+        try:
+            self._send_packet(SERVERDATA_EXECCOMMAND, cmd)
+            response = self._receive_packet()
+            return response[1].decode('utf-8', errors='ignore')
+        except socket.timeout:
+            raise Exception("Command timeout")
+    
+    def disconnect(self):
+        """Close the connection."""
+        if self.socket:
+            try:
+                self.socket.close()
+            except Exception:
+                pass
+            finally:
+                self.socket = None
+    
+    def _send_packet(self, packet_type: int, payload: str):
+        """Send an RCON packet."""
+        self.request_id += 1
+        payload_bytes = payload.encode('utf-8')
+        
+        # Packet structure: ID (4 bytes) + Type (4 bytes) + Payload + 2 null bytes
+        packet = struct.pack('<ii', self.request_id, packet_type) + payload_bytes + b'\x00\x00'
+        length = struct.pack('<i', len(packet))
+        
+        self.socket.sendall(length + packet)
+    
+    def _receive_packet(self):
+        """Receive an RCON packet."""
+        # Read length (4 bytes)
+        length_data = self._recv_exact(4)
+        length = struct.unpack('<i', length_data)[0]
+        
+        # Read packet data
+        packet_data = self._recv_exact(length)
+        
+        # Parse packet: ID (4 bytes) + Type (4 bytes) + Payload (rest - 2 null bytes)
+        request_id = struct.unpack('<i', packet_data[:4])[0]
+        packet_type = struct.unpack('<i', packet_data[4:8])[0]
+        payload = packet_data[8:-2]  # Remove trailing null bytes
+        
+        return (request_id, payload, packet_type)
+    
+    def _recv_exact(self, num_bytes: int) -> bytes:
+        """Receive exact number of bytes from socket."""
+        data = b''
+        while len(data) < num_bytes:
+            chunk = self.socket.recv(num_bytes - len(data))
+            if not chunk:
+                raise Exception("Connection closed by server")
+            data += chunk
+        return data
 
 
 def run_command(command: str, user_id: Optional[int] = None):
-    """Execute a command on the Minecraft server via RCON with connection reuse.
+    """Execute a command on the Minecraft server via RCON.
+    Creates a fresh connection for each command (thread-safe).
     
     Args:
         command: The RCON command to execute
         user_id: User ID to use their specific server connection
     """
+    client = None
     try:
-        client = _get_client(user_id)
-        return client.command(command)
-    except ConnectionError:
-        return "Error: Cannot connect to RCON server. Please configure RCON settings in the Settings page."
-    except (socket.timeout, ConnectionRefusedError, OSError, MCRconException) as conn_err:
-        cache_key = user_id if user_id is not None else "default"
-        with _pool_lock:
-            _client_pool[cache_key] = None
-        if isinstance(conn_err, socket.timeout) or isinstance(conn_err, MCRconException):
-            return "Error: Connection timed out. Is the Minecraft server running?"
+        # Get config for this user
+        cfg = get_rcon_config(user_id)
+        
+        # Create new connection
+        logger.debug(f"Connecting to RCON at {cfg['host']}:{cfg['port']}")
+        client = RconClient(cfg["host"], cfg["password"], port=cfg["port"], timeout=10)
+        client.connect()
+        
+        # Execute command
+        logger.debug(f"Executing command: {command}")
+        response = client.command(command)
+        
+        # Clean disconnect
+        client.disconnect()
+        logger.debug("Command executed successfully")
+        
+        return response
+        
+    except socket.timeout:
+        logger.error("RCON connection timed out")
+        return "Error: Connection timed out. Is the Minecraft server running?"
+        
+    except ConnectionRefusedError:
+        logger.error("RCON connection refused")
         return "Error: Connection refused. Make sure Minecraft server is running and RCON is enabled."
+        
     except Exception as e:
         error_msg = str(e)
-        if "Authentication failed" in error_msg or "Login failed" in error_msg:
-            cache_key = user_id if user_id is not None else "default"
-            with _pool_lock:
-                _client_pool[cache_key] = None
+        logger.error(f"RCON error: {error_msg}")
+        
+        if "Authentication failed" in error_msg or "invalid password" in error_msg.lower():
             return "Error: Authentication failed. Check RCON password in settings."
-
-        # Attempt one reconnect+retry on a broken pipe/socket closure
-        try:
-            cache_key = user_id if user_id is not None else "default"
-            with _pool_lock:
-                try:
-                    if cache_key in _client_pool and _client_pool[cache_key]:
-                        _client_pool[cache_key].disconnect()
-                except Exception:
-                    pass
-                _client_pool[cache_key] = _connect_new(user_id)
-                return _client_pool[cache_key].command(command)
-        except (ConnectionError, socket.timeout, ConnectionRefusedError, OSError, MCRconException):
-            with _pool_lock:
-                _client_pool[cache_key] = None
-            return "Error: Cannot connect to RCON server. Please check your settings."
-        except Exception:
-            return f"Error: {error_msg}"
+        
+        if "timeout" in error_msg.lower():
+            return "Error: Connection timed out. Is the Minecraft server running?"
+        
+        if "refused" in error_msg.lower():
+            return "Error: Connection refused. Make sure Minecraft server is running and RCON is enabled."
+        
+        return f"Error: {error_msg}"
+        
+    finally:
+        # Ensure connection is closed
+        if client:
+            try:
+                client.disconnect()
+            except Exception:
+                pass
 
 
 def reset_rcon_client(user_id: Optional[int] = None):
-    """Drop the cached client for a user so new config is picked up on next command."""
-    global _client_pool
-    cache_key = user_id if user_id is not None else "default"
-    
-    with _pool_lock:
-        try:
-            if cache_key in _client_pool and _client_pool[cache_key]:
-                _client_pool[cache_key].disconnect()
-        except Exception:
-            pass
-        _client_pool[cache_key] = None
+    """No-op function kept for backwards compatibility.
+    Since we don't pool connections anymore, there's nothing to reset.
+    """
+    pass
+
 
 def is_rcon_error(response):
     """Check if RCON response indicates an error."""
@@ -208,15 +215,21 @@ def get_online_players(user_id: Optional[int] = None):
     """Get list of online players for a specific user's server"""
     try:
         response = run_command("list", user_id)
-        # Parse response like "There are 2 of a max of 20 players online: player1, player2"
-        if "Error" in response or not response:
-            # Return empty list silently - don't block UI
+        
+        # Handle errors silently
+        if not response or "Error" in response:
+            logger.debug("Could not get player list, returning empty")
             return []
+        
+        # Parse response like "There are 2 of a max of 20 players online: player1, player2"
         if "online:" in response:
             players_str = response.split("online:")[1].strip()
             if players_str:
                 return [p.strip() for p in players_str.split(",")]
+        
         return []
+        
     except Exception as e:
         # Fail gracefully - don't block the application
+        logger.debug(f"Exception getting online players: {e}")
         return []
